@@ -11,17 +11,17 @@ Replace new tab with your real-time age display. Mindful living reminder inspire
 This extension replaces your new tab page with a real-time display of your current age.
 The extension calculates and shows your age with millisecond precision, updating continuously as time passes. You enter your birth date once, and every new tab displays how long you've been alive.
 
-**What it does:**
+What it does:
 - Replaces the default new tab page with an age counter
 - Shows your age in years with decimal precision (e.g., 25.187429105)
 - Updates in real-time without requiring page refresh
 - Stores your birth date locally in your browser
 - Works offline and requires no permissions
 
-**Privacy:**
+Privacy:
 Your birth date is stored only on your device using Chrome's local storage. No data is sent to external servers or third parties. The extension requires no special permissions and works completely offline.
 
-**Technical details:**
+Technical details:
 Built with Manifest V3 for modern Chrome browsers. The interface automatically adapts to your system's dark or light theme. The extension is lightweight and does not affect browser performance.
 
 This is an independent implementation inspired by Alex MacCaw's original 2013 extension concept, rewritten for current web standards and privacy requirements.
@@ -38,12 +38,12 @@ This extension has a single purpose: to replace the new tab page with a real-tim
 
 - Does not collect any user data
 - Does not transmit any data to external servers
-- Birth date is stored locally via `localStorage` on the user's device only
+- Birth date is stored locally via localStorage on the user's device only
 - No analytics, tracking, or third-party scripts
 
 ## Permissions justification
 
-- `chrome_url_overrides: newtab` — Required to replace the new tab page (the core function of the extension)
+- chrome_url_overrides: newtab — Required to replace the new tab page (the core function of the extension)
 - No other permissions requested
 
 ---
