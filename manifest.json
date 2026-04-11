@@ -1,7 +1,7 @@
 {
    "manifest_version": 3,
    "name": "Motivation - Age Counter",
-   "version": "1.0.3",
+   "version": "1.0.4",
    "description": "Replace new tab with your real-time age display. Mindful living reminder inspired by memento mori philosophy.",
    "author": "Igor Pershin <igor.pershin.me@gmail.com>",
    "homepage_url": "https://github.com/1gory/motivation-age-counter-extension",
