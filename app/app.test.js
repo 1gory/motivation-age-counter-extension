@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { calculateAge, TemplateEngine, MILLISECONDS_PER_YEAR } from './app.js';
+import { calculateAge, calculateCountdown, endOfYear, TemplateEngine, MILLISECONDS_PER_YEAR } from './app.js';
+import { hashDay, getQuoteOfTheDay } from './daily-quote.js';
 
 describe('MILLISECONDS_PER_YEAR', () => {
   it('equals 365.2425 days in milliseconds (Gregorian year)', () => {
@@ -78,5 +79,112 @@ describe('TemplateEngine', () => {
   it('ignores variables with dots or special chars (only word chars matched)', () => {
     const fn = TemplateEngine.compile('{{a.b}}');
     expect(fn({ 'a.b': 'x' })).toBe('{{a.b}}');
+  });
+});
+
+describe('calculateCountdown', () => {
+  it('returns time remaining as years with 9 decimal digits', () => {
+    const now = new Date('2026-01-01T00:00:00Z');
+    const target = new Date('2027-01-01T00:00:00Z');
+    const { yearPart, decimalPart } = calculateCountdown(target, now);
+    expect(parseInt(yearPart, 10)).toBe(0);
+    expect(decimalPart).toHaveLength(9);
+  });
+
+  it('returns zero when target is in the past', () => {
+    const now = new Date('2026-06-01T00:00:00Z');
+    const target = new Date('2025-01-01T00:00:00Z');
+    const { yearPart, decimalPart } = calculateCountdown(target, now);
+    expect(yearPart).toBe('0');
+    expect(decimalPart).toBe('000000000');
+  });
+});
+
+describe('endOfYear', () => {
+  it('returns Dec 31 of the current year', () => {
+    const now = new Date('2026-04-14T10:00:00');
+    const eoy = endOfYear(now);
+    expect(eoy.getFullYear()).toBe(2026);
+    expect(eoy.getMonth()).toBe(11);
+    expect(eoy.getDate()).toBe(31);
+  });
+
+  it('is always in the future relative to a mid-year date', () => {
+    const now = new Date('2026-06-15T00:00:00');
+    expect(endOfYear(now) > now).toBe(true);
+  });
+});
+
+describe('hashDay', () => {
+  it('is deterministic — same input always yields same result', () => {
+    expect(hashDay('2026-01-01')).toBe(hashDay('2026-01-01'));
+    expect(hashDay('2000-06-15')).toBe(hashDay('2000-06-15'));
+  });
+
+  it('produces different values for different dates', () => {
+    expect(hashDay('2026-01-01')).not.toBe(hashDay('2026-01-02'));
+    expect(hashDay('2026-01-01')).not.toBe(hashDay('2026-02-01'));
+  });
+
+  it('is always non-negative', () => {
+    const dates = ['2026-01-01', '2000-12-31', '1999-06-15', '2099-01-01'];
+    for (const d of dates) {
+      expect(hashDay(d)).toBeGreaterThanOrEqual(0);
+    }
+  });
+});
+
+describe('getQuoteOfTheDay', () => {
+  const quotes = [
+    { text: 'Alpha', author: 'Plato' },
+    { text: 'Beta', author: 'Aristotle', year: 350 },
+    { text: 'Gamma', author: 'Socrates' },
+  ];
+
+  it('returns an object with text and author', () => {
+    const q = getQuoteOfTheDay(quotes);
+    expect(q).toHaveProperty('text');
+    expect(q).toHaveProperty('author');
+  });
+
+  it('is stable for the same date across calls', () => {
+    const d = new Date('2026-04-14T00:00:00Z');
+    expect(getQuoteOfTheDay(quotes, d)).toEqual(getQuoteOfTheDay(quotes, d));
+  });
+
+  it('returns different quotes for different dates (over 365 days)', () => {
+    const seen = new Set();
+    const base = new Date('2026-01-01T00:00:00Z');
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(base.getTime() + i * 86400000);
+      seen.add(getQuoteOfTheDay(quotes, d).text);
+    }
+    // With 3 quotes, all 3 should appear within a year
+    expect(seen.size).toBe(quotes.length);
+  });
+
+  it('works with a single-quote array', () => {
+    const single = [{ text: 'Only one', author: 'Nobody' }];
+    const q = getQuoteOfTheDay(single);
+    expect(q.text).toBe('Only one');
+  });
+
+  it('handles quotes without year field', () => {
+    const q = getQuoteOfTheDay([{ text: 'No year', author: 'Someone' }]);
+    expect(q.year).toBeUndefined();
+  });
+
+  it('covers at least 360 unique quotes across a year with 1000+ quotes', async () => {
+    const { QUOTES } = await import('./quotes.js');
+    expect(QUOTES.length).toBeGreaterThanOrEqual(1000);
+
+    const seen = new Set();
+    const base = new Date('2026-01-01T00:00:00Z');
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(base.getTime() + i * 86400000);
+      seen.add(getQuoteOfTheDay(QUOTES, d).text);
+    }
+    // With 1000+ quotes, every day should yield a unique quote
+    expect(seen.size).toBe(365);
   });
 });

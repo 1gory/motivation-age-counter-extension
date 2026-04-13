@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>New Tab</title>
-  <meta name="description" content="A motivational display of your current age">
+  <meta name="description" content="A motivational time counter">
   <link rel="icon" href="icons/tab-icon-32.png" type="image/png">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -23,9 +23,80 @@
 </script>
 
 <script type="text/template" id="age-template">
-  <h1 class="age-label">AGE</h1>
-  <h2 class="count"><span class="year">{{year}}</span><sup>.<span class="milliseconds">{{milliseconds}}</span></sup></h2>
+  <div class="counter-block">
+    <h1 class="age-label">{{label}}</h1>
+    <h2 class="count"><span class="year">{{year}}</span><sup>.<span class="milliseconds">{{milliseconds}}</span></sup></h2>
+  </div>
 </script>
+
+<script type="text/template" id="quote-template">
+  <figure class="daily-quote">
+    <blockquote>
+      <p class="quote-text">{{text}}</p>
+    </blockquote>
+    <figcaption class="quote-attribution">
+      — <cite class="quote-author">{{author}}</cite><span class="quote-year">{{year}}</span>
+    </figcaption>
+  </figure>
+</script>
+
+<button class="settings-btn" id="settings-btn" title="Settings" aria-label="Open settings">&#9881;</button>
+
+<div class="settings-overlay" id="settings-overlay" hidden>
+  <div class="settings-panel" role="dialog" aria-label="Settings">
+    <h2 class="settings-title">Settings</h2>
+
+    <section class="settings-section">
+      <span class="settings-label">Counter size</span>
+      <div class="settings-size-picker">
+        <button type="button" class="size-option" data-size="small">S</button>
+        <button type="button" class="size-option" data-size="medium">M</button>
+        <button type="button" class="size-option" data-size="large">L</button>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <span class="settings-label">Display mode</span>
+      <div class="settings-modes">
+        <label class="settings-mode-option">
+          <input type="radio" name="mode" value="age">
+          <span>Age counter</span>
+        </label>
+        <label class="settings-mode-option">
+          <input type="radio" name="mode" value="countdown-year">
+          <span>Until end of year</span>
+        </label>
+        <label class="settings-mode-option">
+          <input type="radio" name="mode" value="countdown-date">
+          <span>Until date</span>
+          <input type="date" id="settings-countdown-date" class="settings-date settings-date--inline" hidden>
+        </label>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <label class="settings-label" for="settings-dob">Date of birth</label>
+      <div class="settings-row">
+        <input type="date" id="settings-dob" class="settings-date">
+        <button type="button" class="settings-save" id="settings-save">Save</button>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <label class="settings-toggle-row">
+        <span>Daily quote</span>
+        <input type="checkbox" id="settings-quote-toggle" class="settings-checkbox">
+        <span class="settings-toggle-track"><span class="settings-toggle-thumb"></span></span>
+      </label>
+    </section>
+
+    <button class="settings-close" id="settings-close" aria-label="Close settings">&#x2715;</button>
+
+    <div class="settings-footer">
+      <button type="button" class="settings-done" id="settings-done">Done</button>
+    </div>
+  </div>
+</div>
 
 <script type="module" src="app/app.js"></script>
 

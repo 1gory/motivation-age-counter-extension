@@ -1,8 +1,8 @@
 {
    "manifest_version": 3,
-   "name": "Motivation - Age Counter",
-   "version": "1.0.4",
-   "description": "Replace new tab with your real-time age display. Mindful living reminder inspired by memento mori philosophy.",
+   "name": "Motivation Counter",
+   "version": "1.1.0",
+   "description": "Replace new tab with a real-time motivation counter: track your age, countdown to a date, or to the end of the year.",
    "author": "Igor Pershin <igor.pershin.me@gmail.com>",
    "homepage_url": "https://github.com/1gory/motivation-age-counter-extension",
    "chrome_url_overrides": {
@@ -15,7 +15,7 @@
       "128": "icons/icon128.png"
    },
    "action": {
-      "default_title": "Motivation - Age Counter",
+      "default_title": "Motivation Counter",
       "default_icon": {
          "16": "icons/icon16.png",
          "32": "icons/icon32.png",
