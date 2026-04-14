@@ -1,224 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Motivation Counter — Chrome Extension</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Motivation Counter</title>
   <meta name="description" content="Replace your new tab with a real-time counter. Track your age, countdown to a date, or to the end of the year.">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg: #0e0e0e;
-      --surface: #1a1a1a;
-      --border: #2a2a2a;
-      --text: #f0f0f0;
-      --muted: #888;
-      --accent: #e8e8e8;
-    }
-
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #222;
       line-height: 1.6;
-      min-height: 100vh;
     }
 
-    a { color: inherit; text-decoration: none; }
-
-    /* ── NAV ── */
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 40px;
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-    .nav-logo img { width: 28px; height: 28px; border-radius: 6px; }
-    .nav-links {
-      display: flex;
-      gap: 24px;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-    .nav-links a:hover { color: var(--text); }
-
-    /* ── HERO ── */
-    .hero {
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 48px 24px 40px;
       text-align: center;
-      padding: 80px 24px 60px;
-      max-width: 680px;
-      margin: 0 auto;
     }
-    .hero h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
-      line-height: 1.2;
-    }
-    .hero p {
-      font-size: 1.1rem;
-      color: var(--muted);
-      max-width: 480px;
-      margin: 0 auto 36px;
-    }
-    .cta-group {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 500;
-      transition: opacity 0.15s;
-    }
-    .btn:hover { opacity: 0.85; }
-    .btn-primary {
-      background: var(--accent);
-      color: #0e0e0e;
-    }
-    .btn-secondary {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-    .btn svg { flex-shrink: 0; }
 
-    /* ── SCREENSHOT ── */
-    .screenshot-wrap {
-      max-width: 900px;
-      margin: 0 auto 80px;
-      padding: 0 24px;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      border-radius: 12px;
-      border: 1px solid var(--border);
+    .logo {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 16px;
       display: block;
     }
 
-    /* ── FEATURES ── */
-    .features {
-      max-width: 800px;
-      margin: 0 auto 80px;
-      padding: 0 24px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 10px;
     }
-    .feature {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 24px;
-    }
-    .feature-icon { font-size: 1.4rem; margin-bottom: 10px; }
-    .feature h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
-    .feature p { font-size: 0.85rem; color: var(--muted); }
 
-    /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 28px 40px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.82rem;
-      color: var(--muted);
+    .tagline {
+      font-size: 16px;
+      color: #666;
+      max-width: 520px;
+      margin: 0 auto 28px;
     }
-    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
-    .footer-links a:hover { color: var(--text); }
+
+    .cws-badge {
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .cws-badge img {
+      height: 58px;
+      transition: opacity 0.15s;
+    }
+
+    .cws-badge:hover img { opacity: 0.85; }
+
+    main {
+      max-width: 720px;
+      margin: 48px auto;
+      padding: 0 24px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .feature {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .feature-icon {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .feature h2 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .feature p {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .links {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+      margin-bottom: 48px;
+    }
+
+    .links a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 22px;
+      color: #222;
+      text-decoration: none;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.12s;
+    }
+
+    .links a:last-child { border-bottom: none; }
+    .links a:hover { background: #fafafa; }
+
+    .link-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .link-icon--red   { background: rgba(217,64,64,0.1); }
+    .link-icon--dark  { background: #f0f0f0; }
+    .link-icon--gray  { background: #f0f0f0; }
+
+    .link-text strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .link-text span {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .link-arrow {
+      margin-left: auto;
+      color: #ccc;
+      font-size: 18px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    footer a { color: #aaa; }
   </style>
 </head>
 <body>
 
-  <nav>
-    <div class="nav-logo">
-      <img src="../icons/icon128.png" alt="Motivation Counter icon">
-      Motivation Counter
-    </div>
-    <div class="nav-links">
-      <a href="https://github.com/1gory/motivation-age-counter-extension">GitHub</a>
-      <a href="privacy-policy.html">Privacy Policy</a>
-    </div>
-  </nav>
+<header>
+  <img class="logo" src="icon128.png" alt="Motivation Counter icon">
+  <h1>Motivation Counter</h1>
+  <p class="tagline">Replace your new tab with a real-time counter. Track your age, countdown to a date, or to the end of the year.</p>
+  <a class="cws-badge" href="https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl" target="_blank" rel="noopener">
+    <img src="https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/UV4C4sCIILQ7HIeydxAm.png" alt="Available in the Chrome Web Store">
+  </a>
+</header>
 
-  <section class="hero">
-    <h1>Make every new tab count</h1>
-    <p>Replace your new tab with a real-time counter. Track your age, countdown to a date, or to the end of the year.</p>
-    <div class="cta-group">
-      <a class="btn btn-primary" href="https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
-          <circle cx="9" cy="9" r="3" fill="currentColor"/>
-          <path d="M9 6 L14.2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M5.4 12.6 L7.5 8.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M12.6 12.6 L10.5 8.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        Add to Chrome
-      </a>
-      <a class="btn btn-secondary" href="https://github.com/1gory/motivation-age-counter-extension">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-        </svg>
-        View on GitHub
-      </a>
-    </div>
-  </section>
+<main>
 
-  <div class="screenshot-wrap">
-    <img src="../images/screenshot_1280x800_1.jpg" alt="Motivation Counter showing age counter on new tab">
-  </div>
-
-  <section class="features">
+  <div class="features">
     <div class="feature">
       <div class="feature-icon">⏱</div>
-      <h3>Age counter</h3>
-      <p>Watch your age tick up in real time, down to the millisecond.</p>
+      <h2>Age counter</h2>
+      <p>Watch your age tick up in real time, down to the millisecond. A quiet reminder that time is passing.</p>
     </div>
     <div class="feature">
       <div class="feature-icon">📅</div>
-      <h3>Countdown modes</h3>
-      <p>Count down to the end of the year or to any date you choose.</p>
+      <h2>Countdown modes</h2>
+      <p>Count down to the end of the year or to any date you choose — a deadline, a birthday, an event.</p>
     </div>
     <div class="feature">
       <div class="feature-icon">💬</div>
-      <h3>Daily quote</h3>
-      <p>A new motivational quote every day from a curated collection.</p>
+      <h2>Daily quote</h2>
+      <p>A new motivational quote every day from a curated collection. Toggle it off if you prefer silence.</p>
     </div>
     <div class="feature">
       <div class="feature-icon">🔒</div>
-      <h3>Completely private</h3>
-      <p>No tracking, no analytics. All data stays in your browser.</p>
+      <h2>Completely private</h2>
+      <p>No tracking, no analytics, no external connections. All data stays in your browser.</p>
     </div>
-  </section>
+  </div>
 
-  <footer>
-    <span>© 2025 Igor Pershin. Based on the original by <a href="https://github.com/maccman" style="color: inherit; text-decoration: underline;">Alex MacCaw</a>.</span>
-    <div class="footer-links">
-      <a href="https://github.com/1gory/motivation-age-counter-extension">GitHub</a>
-      <a href="https://github.com/1gory/motivation-age-counter-extension/blob/main/LICENSE">License</a>
-      <a href="privacy-policy.html">Privacy Policy</a>
-      <a href="https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl">Chrome Web Store</a>
-    </div>
-  </footer>
+  <div class="links">
+    <a href="https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl" target="_blank" rel="noopener">
+      <div class="link-icon link-icon--red">🧩</div>
+      <div class="link-text">
+        <strong>Chrome Web Store</strong>
+        <span>Install the extension</span>
+      </div>
+      <span class="link-arrow">›</span>
+    </a>
+    <a href="https://github.com/1gory/motivation-age-counter-extension" target="_blank" rel="noopener">
+      <div class="link-icon link-icon--dark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#333"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577v-2.165c-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.73.083-.73 1.205.085 1.84 1.237 1.84 1.237 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.123-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.3 1.23a11.52 11.52 0 0 1 3-.404c1.02.005 2.047.138 3 .404 2.29-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.12 3.176.77.84 1.232 1.91 1.232 3.22 0 4.61-2.807 5.625-5.48 5.92.43.372.823 1.102.823 2.222v3.293c0 .322.218.694.825.576C20.565 21.796 24 17.298 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      </div>
+      <div class="link-text">
+        <strong>GitHub</strong>
+        <span>Source code and releases</span>
+      </div>
+      <span class="link-arrow">›</span>
+    </a>
+    <a href="https://github.com/1gory/motivation-age-counter-extension/releases" target="_blank" rel="noopener">
+      <div class="link-icon link-icon--gray">📦</div>
+      <div class="link-text">
+        <strong>Releases</strong>
+        <span>Download ZIP for manual installation</span>
+      </div>
+      <span class="link-arrow">›</span>
+    </a>
+    <a href="privacy-policy.html">
+      <div class="link-icon link-icon--gray">🔒</div>
+      <div class="link-text">
+        <strong>Privacy Policy</strong>
+        <span>No data collected — everything stays on your device</span>
+      </div>
+      <span class="link-arrow">›</span>
+    </a>
+    <a href="https://github.com/1gory/motivation-age-counter-extension/blob/main/LICENSE" target="_blank" rel="noopener">
+      <div class="link-icon link-icon--gray">📄</div>
+      <div class="link-text">
+        <strong>MIT License</strong>
+        <span>Open source · © Igor Pershin</span>
+      </div>
+      <span class="link-arrow">›</span>
+    </a>
+  </div>
+
+</main>
+
+<footer>
+  Made by <a href="https://github.com/1gory" target="_blank" rel="noopener">Igor Pershin</a>
+</footer>
 
 </body>
 </html>
