@@ -51,17 +51,49 @@ Click the ⚙ icon in the bottom-right corner to:
 2. Click "Add to Chrome"
 3. Enter your birth date when prompted
 
-### Manual Installation
-1. Download this repository
-2. Open Chrome and go to `chrome://extensions/`
-3. Enable "Developer mode"
-4. Click "Load unpacked" and select the extension folder
+### Manual installation (without Chrome Web Store)
+
+**English**
+
+1. Go to the [Releases page](https://github.com/1gory/motivation-age-counter-extension/releases) and download the latest `motivation-counter-vX.X.X.zip`  
+   *(or on the main page click **Code → Download ZIP** and unpack it)*
+2. Unpack the ZIP — you will get a folder with the extension files
+3. Open Chrome and type `chrome://extensions/` in the address bar, press Enter
+4. Turn on **Developer mode** — the toggle is in the top-right corner of the page
+5. Click **Load unpacked** and select the unpacked folder
+6. The extension icon will appear in the toolbar. Pin it by clicking the puzzle icon → pin next to the extension name
+7. Open a new tab — the counter will appear right away
+
+> Works in any Chromium-based browser: Chrome, Brave, Edge, Opera, Vivaldi.
+
+---
+
+**Русский**
+
+1. Перейдите на [страницу релизов](https://github.com/1gory/motivation-age-counter-extension/releases) и скачайте последний файл `motivation-counter-vX.X.X.zip`  
+   *(или на главной странице репозитория нажмите **Code → Download ZIP**)*
+2. Распакуйте ZIP-архив — появится папка с файлами расширения
+3. Откройте Chrome и введите в адресной строке `chrome://extensions/`, нажмите Enter
+4. Включите **Режим разработчика** — переключатель в правом верхнем углу страницы
+5. Нажмите **Загрузить распакованное расширение** и выберите распакованную папку
+6. Иконка расширения появится на панели инструментов. Закрепите её: нажмите иконку пазла → значок булавки рядом с названием расширения
+7. Откройте новую вкладку — счётчик появится сразу
+
+> Работает в любом браузере на основе Chromium: Chrome, Brave, Edge, Opera, Vivaldi.
 
 ## Development
 
+### Run tests
 ```bash
-npm test   # run test suite
+npm test
 ```
+
+### Package for release
+```bash
+zip -r motivation-counter-v1.1.1.zip manifest.json dashboard.html css/ icons/ app/app.js app/daily-quote.js app/quotes.js
+```
+
+The zip includes only the files required by the extension. Do **not** include `node_modules/`, `app/app.test.js`, screenshots, or any markdown files.
 
 ## Legal & Disclaimer
 
