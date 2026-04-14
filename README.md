@@ -2,11 +2,13 @@
 
 A modernized version of Alex MacCaw's iconic "Motivation" Chrome extension, updated for current browser standards and expanded with new counter modes.
 
-**[Install from Chrome Web Store](https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl)** &nbsp;·&nbsp; **[GitHub](https://github.com/1gory/motivation-age-counter-extension)** &nbsp;·&nbsp; **[Privacy Policy](https://1gory.github.io/motivation-age-counter-extension/privacy-policy.html)**
+[<img src="https://raw.githubusercontent.com/1gory/motivation-age-counter-extension/main/docs/chrome-webstore-badge.png" alt="Available in the Chrome Web Store" height="58">](https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl)
 
-![Extension Preview](images/screenshot_1280x800_1.jpg)
-![Extension Preview](images/screenshot_1280x800_2.jpg)
-![Extension Preview](images/screenshot_1280x800_3.jpg)
+**[Website](https://1gory.github.io/motivation-age-counter-extension/)** &nbsp;·&nbsp; **[Privacy Policy](https://1gory.github.io/motivation-age-counter-extension/privacy-policy.html)**
+
+<img src="images/screenshot_1280x800_1.jpg" width="480" alt="Extension Preview">
+<img src="images/screenshot_1280x800_2.jpg" width="480" alt="Extension Preview">
+<img src="images/screenshot_1280x800_3.jpg" width="480" alt="Extension Preview">
 
 ## Credits & Attribution
 
