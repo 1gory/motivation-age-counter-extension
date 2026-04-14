@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Motivation Counter — Chrome Extension</title>
+  <meta name="description" content="Replace your new tab with a real-time counter. Track your age, countdown to a date, or to the end of the year.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e0e;
+      --surface: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #f0f0f0;
+      --muted: #888;
+      --accent: #e8e8e8;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .nav-logo img { width: 28px; height: 28px; border-radius: 6px; }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 80px 24px 60px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto 36px;
+    }
+    .cta-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary {
+      background: var(--accent);
+      color: #0e0e0e;
+    }
+    .btn-secondary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn svg { flex-shrink: 0; }
+
+    /* ── SCREENSHOT ── */
+    .screenshot-wrap {
+      max-width: 900px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+    .screenshot-wrap img {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: block;
+    }
+
+    /* ── FEATURES ── */
+    .features {
+      max-width: 800px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .feature {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+    }
+    .feature-icon { font-size: 1.4rem; margin-bottom: 10px; }
+    .feature h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
+    .feature p { font-size: 0.85rem; color: var(--muted); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 40px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-links a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">
+      <img src="../icons/icon128.png" alt="Motivation Counter icon">
+      Motivation Counter
+    </div>
+    <div class="nav-links">
+      <a href="https://github.com/1gory/motivation-age-counter-extension">GitHub</a>
+      <a href="privacy-policy.html">Privacy Policy</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Make every new tab count</h1>
+    <p>Replace your new tab with a real-time counter. Track your age, countdown to a date, or to the end of the year.</p>
+    <div class="cta-group">
+      <a class="btn btn-primary" href="https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="9" cy="9" r="3" fill="currentColor"/>
+          <path d="M9 6 L14.2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M5.4 12.6 L7.5 8.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M12.6 12.6 L10.5 8.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Add to Chrome
+      </a>
+      <a class="btn btn-secondary" href="https://github.com/1gory/motivation-age-counter-extension">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        View on GitHub
+      </a>
+    </div>
+  </section>
+
+  <div class="screenshot-wrap">
+    <img src="../images/screenshot_1280x800_1.jpg" alt="Motivation Counter showing age counter on new tab">
+  </div>
+
+  <section class="features">
+    <div class="feature">
+      <div class="feature-icon">⏱</div>
+      <h3>Age counter</h3>
+      <p>Watch your age tick up in real time, down to the millisecond.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📅</div>
+      <h3>Countdown modes</h3>
+      <p>Count down to the end of the year or to any date you choose.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">💬</div>
+      <h3>Daily quote</h3>
+      <p>A new motivational quote every day from a curated collection.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <h3>Completely private</h3>
+      <p>No tracking, no analytics. All data stays in your browser.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2025 Igor Pershin. Based on the original by <a href="https://github.com/maccman" style="color: inherit; text-decoration: underline;">Alex MacCaw</a>.</span>
+    <div class="footer-links">
+      <a href="https://github.com/1gory/motivation-age-counter-extension">GitHub</a>
+      <a href="https://github.com/1gory/motivation-age-counter-extension/blob/main/LICENSE">License</a>
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl">Chrome Web Store</a>
+    </div>
+  </footer>
+
+</body>
+</html>

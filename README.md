@@ -2,6 +2,8 @@
 
 A modernized version of Alex MacCaw's iconic "Motivation" Chrome extension, updated for current browser standards and expanded with new counter modes.
 
+**[Install from Chrome Web Store](https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl)** &nbsp;·&nbsp; **[GitHub](https://github.com/1gory/motivation-age-counter-extension)** &nbsp;·&nbsp; **[Privacy Policy](https://1gory.github.io/motivation-age-counter-extension/privacy-policy.html)**
+
 ![Extension Preview](images/screenshot_1280x800_1.jpg)
 ![Extension Preview](images/screenshot_1280x800_2.jpg)
 ![Extension Preview](images/screenshot_1280x800_3.jpg)
@@ -45,7 +47,7 @@ Click the ⚙ icon in the bottom-right corner to:
 ## Installation
 
 ### From Chrome Web Store
-1. Visit the Chrome Web Store page
+1. Visit the [Chrome Web Store page](https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl)
 2. Click "Add to Chrome"
 3. Enter your birth date when prompted
 
