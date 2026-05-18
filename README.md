@@ -6,9 +6,9 @@ A modernized version of Alex MacCaw's iconic "Motivation" Chrome extension, upda
 
 **[Website](https://1gory.github.io/motivation-age-counter-extension/)** &nbsp;·&nbsp; **[Privacy Policy](https://1gory.github.io/motivation-age-counter-extension/privacy-policy.html)**
 
-<img src="images/screenshot_1280x800_1.jpg" width="480" alt="Extension Preview">
-<img src="images/screenshot_1280x800_2.jpg" width="480" alt="Extension Preview">
-<img src="images/screenshot_1280x800_3.jpg" width="480" alt="Extension Preview">
+<img src="images/screenshots/screenshot_1280x800_1.jpg" width="480" alt="Extension Preview">
+<img src="images/screenshots/screenshot_1280x800_2.jpg" width="480" alt="Extension Preview">
+<img src="images/screenshots/screenshot_1280x800_3.jpg" width="480" alt="Extension Preview">
 
 ## Credits & Attribution
 
