@@ -39,6 +39,12 @@ export class App {
     this.mode = 'age'; // 'age' | 'countdown-year' | 'countdown-date'
     this.countdownDate = null; // Date object for countdown-date mode
     this.counterSize = 'medium'; // 'small' | 'medium' | 'large'
+    this.themeMode = 'auto'; // 'auto' | 'light' | 'dark'
+    this.lightVariant = 'classic'; // 'classic' | 'warm' | 'mist'
+    this.darkVariant = 'classic'; // 'classic' | 'midnight' | 'graphite'
+    this.font = 'sans'; // 'sans' | 'serif' | 'mono'
+    this.darkMql = null;
+    this.darkMqlHandler = null;
 
     this.load();
     this.loadConfig();
@@ -66,8 +72,15 @@ export class App {
   loadConfig() {
     this.showQuote = localStorage.getItem('showQuote') !== '0';
     this.mode = localStorage.getItem('mode') || 'age';
-    this.counterSize = localStorage.getItem('counterSize') || 'medium';
+    const storedSize = localStorage.getItem('counterSize');
+    this.counterSize = ['small', 'medium', 'large'].includes(storedSize) ? storedSize : 'medium';
+    this.themeMode = localStorage.getItem('themeMode') || 'auto';
+    this.lightVariant = localStorage.getItem('lightVariant') || 'classic';
+    this.darkVariant = localStorage.getItem('darkVariant') || 'classic';
+    this.font = localStorage.getItem('font') || 'sans';
     this.applyCounterSize();
+    this.applyTheme();
+    this.applyFont();
     const cdTs = localStorage.getItem('countdownDate');
     if (cdTs) {
       const d = new Date(parseInt(cdTs, 10));
@@ -79,6 +92,10 @@ export class App {
     localStorage.setItem('showQuote', this.showQuote ? '1' : '0');
     localStorage.setItem('mode', this.mode);
     localStorage.setItem('counterSize', this.counterSize);
+    localStorage.setItem('themeMode', this.themeMode);
+    localStorage.setItem('lightVariant', this.lightVariant);
+    localStorage.setItem('darkVariant', this.darkVariant);
+    localStorage.setItem('font', this.font);
     if (this.countdownDate) {
       localStorage.setItem('countdownDate', this.countdownDate.getTime().toString());
     }
@@ -166,6 +183,45 @@ export class App {
     document.body.classList.add(`size-${this.counterSize}`);
   }
 
+  resolveScheme() {
+    if (this.themeMode === 'light' || this.themeMode === 'dark') return this.themeMode;
+    if (typeof window === 'undefined' || !window.matchMedia) return 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  applyTheme() {
+    if (typeof document === 'undefined') return;
+    const body = document.body;
+    const themeClasses = [
+      'theme-light-classic', 'theme-light-warm', 'theme-light-mist',
+      'theme-dark-classic', 'theme-dark-midnight', 'theme-dark-graphite',
+    ];
+    body.classList.remove(...themeClasses);
+    const scheme = this.resolveScheme();
+    const variant = scheme === 'dark' ? this.darkVariant : this.lightVariant;
+    body.classList.add(`theme-${scheme}-${variant}`);
+
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      if (this.darkMql && this.darkMqlHandler) {
+        this.darkMql.removeEventListener('change', this.darkMqlHandler);
+      }
+      if (this.themeMode === 'auto') {
+        this.darkMql = window.matchMedia('(prefers-color-scheme: dark)');
+        this.darkMqlHandler = () => this.applyTheme();
+        this.darkMql.addEventListener('change', this.darkMqlHandler);
+      } else {
+        this.darkMql = null;
+        this.darkMqlHandler = null;
+      }
+    }
+  }
+
+  applyFont() {
+    if (typeof document === 'undefined') return;
+    document.body.classList.remove('font-sans', 'font-serif', 'font-mono');
+    document.body.classList.add(`font-${this.font}`);
+  }
+
   updateSettingsUI() {
     const checkbox = document.getElementById('settings-quote-toggle');
     if (checkbox) checkbox.checked = this.showQuote;
@@ -180,6 +236,19 @@ export class App {
     if (cdInput && this.countdownDate) {
       cdInput.value = this.countdownDate.toISOString().slice(0, 10);
     }
+
+    document.querySelectorAll('[data-theme-mode]').forEach(btn => {
+      btn.classList.toggle('size-option--active', btn.dataset.themeMode === this.themeMode);
+    });
+    document.querySelectorAll('[data-light-variant]').forEach(btn => {
+      btn.classList.toggle('swatch--active', btn.dataset.lightVariant === this.lightVariant);
+    });
+    document.querySelectorAll('[data-dark-variant]').forEach(btn => {
+      btn.classList.toggle('swatch--active', btn.dataset.darkVariant === this.darkVariant);
+    });
+    document.querySelectorAll('[data-font]').forEach(btn => {
+      btn.classList.toggle('font-option--active', btn.dataset.font === this.font);
+    });
   }
 
   setupSettings() {
@@ -191,7 +260,7 @@ export class App {
     const dobInput = document.getElementById('settings-dob');
     const quoteCheckbox = document.getElementById('settings-quote-toggle');
     const cdInput = document.getElementById('settings-countdown-date');
-    const sizeOptions = document.querySelectorAll('.size-option');
+    const sizeOptions = document.querySelectorAll('.size-option[data-size]');
 
     if (!btn || !overlay) return;
 
@@ -276,6 +345,62 @@ export class App {
         this.saveConfig();
         this.applyCounterSize();
         updateSizeButtons();
+      });
+    });
+
+    // Tabs (Counter / Appearance)
+    const activeTab = localStorage.getItem('settingsTab') || 'counter';
+    const setActiveTab = (name) => {
+      document.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.classList.toggle('settings-tab--active', btn.dataset.tab === name);
+      });
+      document.querySelectorAll('[data-tab-panel]').forEach(panel => {
+        panel.classList.toggle('settings-tab-panel--active', panel.dataset.tabPanel === name);
+      });
+      localStorage.setItem('settingsTab', name);
+    };
+    setActiveTab(activeTab);
+    document.querySelectorAll('[data-tab]').forEach(btn => {
+      btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
+    });
+
+    // Theme mode (Auto / Light / Dark)
+    document.querySelectorAll('[data-theme-mode]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.themeMode = btn.dataset.themeMode;
+        this.saveConfig();
+        this.applyTheme();
+        this.updateSettingsUI();
+      });
+    });
+
+    // Light variant
+    document.querySelectorAll('[data-light-variant]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.lightVariant = btn.dataset.lightVariant;
+        this.saveConfig();
+        this.applyTheme();
+        this.updateSettingsUI();
+      });
+    });
+
+    // Dark variant
+    document.querySelectorAll('[data-dark-variant]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.darkVariant = btn.dataset.darkVariant;
+        this.saveConfig();
+        this.applyTheme();
+        this.updateSettingsUI();
+      });
+    });
+
+    // Font preset
+    document.querySelectorAll('[data-font]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.font = btn.dataset.font;
+        this.saveConfig();
+        this.applyFont();
+        this.updateSettingsUI();
       });
     });
 

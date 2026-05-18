@@ -46,53 +46,123 @@
   <div class="settings-panel" role="dialog" aria-label="Settings">
     <h2 class="settings-title">Settings</h2>
 
-    <section class="settings-section">
-      <span class="settings-label">Counter size</span>
-      <div class="settings-size-picker">
-        <button type="button" class="size-option" data-size="small">S</button>
-        <button type="button" class="size-option" data-size="medium">M</button>
-        <button type="button" class="size-option" data-size="large">L</button>
-      </div>
-    </section>
+    <div class="settings-tabs" role="tablist">
+      <button type="button" class="settings-tab" data-tab="counter" role="tab">Counter</button>
+      <button type="button" class="settings-tab" data-tab="appearance" role="tab">Appearance</button>
+    </div>
 
-    <section class="settings-section">
-      <span class="settings-label">Display mode</span>
-      <div class="settings-modes">
-        <label class="settings-mode-option">
-          <input type="radio" name="mode" value="age">
-          <span>Age counter</span>
-        </label>
-        <label class="settings-mode-option">
-          <input type="radio" name="mode" value="countdown-year">
-          <span>Until end of year</span>
-        </label>
-        <label class="settings-mode-option">
-          <input type="radio" name="mode" value="countdown-date">
-          <span>Until date</span>
-          <input type="date" id="settings-countdown-date" class="settings-date settings-date--inline" hidden>
-        </label>
-      </div>
-    </section>
+    <div class="settings-tab-panels">
+    <div class="settings-tab-panel" data-tab-panel="counter">
+      <section class="settings-section">
+        <span class="settings-label">Display mode</span>
+        <div class="settings-modes">
+          <label class="settings-mode-option">
+            <input type="radio" name="mode" value="age">
+            <span>Age counter</span>
+          </label>
+          <label class="settings-mode-option">
+            <input type="radio" name="mode" value="countdown-year">
+            <span>Until end of year</span>
+          </label>
+          <label class="settings-mode-option">
+            <input type="radio" name="mode" value="countdown-date">
+            <span>Until date</span>
+            <input type="date" id="settings-countdown-date" class="settings-date settings-date--inline" hidden>
+          </label>
+        </div>
+      </section>
 
-    <section class="settings-section">
-      <label class="settings-label" for="settings-dob">Date of birth</label>
-      <div class="settings-row">
-        <input type="date" id="settings-dob" class="settings-date">
-        <button type="button" class="settings-save" id="settings-save">Save</button>
-      </div>
-    </section>
+      <section class="settings-section">
+        <label class="settings-label" for="settings-dob">Date of birth</label>
+        <div class="settings-row">
+          <input type="date" id="settings-dob" class="settings-date">
+          <button type="button" class="settings-save" id="settings-save">Save</button>
+        </div>
+      </section>
 
-    <section class="settings-section">
-      <label class="settings-toggle-row">
-        <span>Daily quote</span>
-        <input type="checkbox" id="settings-quote-toggle" class="settings-checkbox">
-        <span class="settings-toggle-track"><span class="settings-toggle-thumb"></span></span>
-      </label>
-    </section>
+      <section class="settings-section">
+        <label class="settings-toggle-row">
+          <span>Daily quote</span>
+          <input type="checkbox" id="settings-quote-toggle" class="settings-checkbox">
+          <span class="settings-toggle-track"><span class="settings-toggle-thumb"></span></span>
+        </label>
+      </section>
+    </div>
+
+    <div class="settings-tab-panel" data-tab-panel="appearance">
+      <section class="settings-section">
+        <span class="settings-label">Counter size</span>
+        <div class="settings-size-picker">
+          <button type="button" class="size-option" data-size="small">S</button>
+          <button type="button" class="size-option" data-size="medium">M</button>
+          <button type="button" class="size-option" data-size="large">L</button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <span class="settings-label">Theme</span>
+        <div class="settings-segmented">
+          <button type="button" class="size-option" data-theme-mode="auto">Auto</button>
+          <button type="button" class="size-option" data-theme-mode="light">Light</button>
+          <button type="button" class="size-option" data-theme-mode="dark">Dark</button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <span class="settings-label">Light variant</span>
+        <div class="settings-swatches">
+          <button type="button" class="swatch" data-light-variant="classic" title="Classic"
+                  style="background:#FFFFFF;">
+            <span class="swatch-fill" style="color:#494949;">Classic</span>
+          </button>
+          <button type="button" class="swatch" data-light-variant="warm" title="Warm Paper"
+                  style="background:#F5F1E8;">
+            <span class="swatch-fill" style="color:#3A3631;">Warm</span>
+          </button>
+          <button type="button" class="swatch" data-light-variant="mist" title="Cool Mist"
+                  style="background:#ECEFF1;">
+            <span class="swatch-fill" style="color:#37474F;">Mist</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <span class="settings-label">Dark variant</span>
+        <div class="settings-swatches">
+          <button type="button" class="swatch" data-dark-variant="classic" title="Classic"
+                  style="background:#494949;">
+            <span class="swatch-fill" style="color:#FFFFFF;">Classic</span>
+          </button>
+          <button type="button" class="swatch" data-dark-variant="midnight" title="Midnight"
+                  style="background:#0F172A;">
+            <span class="swatch-fill" style="color:#E2E8F0;">Midnight</span>
+          </button>
+          <button type="button" class="swatch" data-dark-variant="graphite" title="Graphite"
+                  style="background:#1C1C1E;">
+            <span class="swatch-fill" style="color:#E5E5E7;">Graphite</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <span class="settings-label">Font</span>
+        <div class="settings-font-picker">
+          <button type="button" class="font-option" data-font="sans">Sans</button>
+          <button type="button" class="font-option" data-font="serif">Serif</button>
+          <button type="button" class="font-option" data-font="mono">Mono</button>
+        </div>
+      </section>
+    </div>
+    </div>
 
     <button class="settings-close" id="settings-close" aria-label="Close settings">&#x2715;</button>
 
     <div class="settings-footer">
+      <p class="settings-feedback">
+        Got an idea to improve this or found a bug?
+        <a href="https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl/reviews"
+           target="_blank" rel="noopener noreferrer">Leave a review</a>
+      </p>
       <button type="button" class="settings-done" id="settings-done">Done</button>
     </div>
   </div>

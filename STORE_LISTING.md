@@ -23,20 +23,20 @@ Choose from three display modes:
 
 Every new tab also shows a daily quote from a curated collection of over 1500 quotes. A new quote appears each day and stays consistent throughout the day. The quote feature can be turned off in settings.
 
-Customize the counter size — small, medium, or large — to suit your preference.
+Make it yours:
+- Six restrained color palettes — three light (Classic, Warm Paper, Cool Mist) and three dark (Classic, Midnight, Graphite) — or follow the system theme automatically
+- Three font presets — Sans, Serif, and Mono
+- Three counter sizes — small, medium, or large
 
-All settings are accessible via the gear icon in the bottom-right corner:
-- Switch display mode
-- Set a target date for countdown
-- Change your date of birth
-- Toggle the daily quote on or off
-- Adjust counter size
+All settings are accessible via the gear icon in the bottom-right corner, organized into two tabs:
+- Counter — display mode, target date, date of birth, daily quote toggle
+- Appearance — counter size, theme, font
 
 Privacy:
 Your birth date and preferences are stored only on your device using browser local storage. No data is sent to external servers or third parties. The extension requires no special permissions and works completely offline.
 
 Technical details:
-Built with Manifest V3 for modern Chrome browsers. The interface automatically adapts to your system's dark or light theme. The extension is lightweight and does not affect browser performance.
+Built with Manifest V3 for modern Chrome browsers. The extension is lightweight and works fully offline — no external requests, no network calls, no tracking.
 
 This is an independent implementation inspired by Alex MacCaw's original 2013 extension concept, rewritten for current web standards and expanded with new counter modes.
 
@@ -127,7 +127,7 @@ zip -r motivation-counter-v$(cat manifest.json | grep '"version"' | head -1 | se
 
 ## Pre-publish checklist
 
-- [ ] Version in `manifest.json` is `1.1.0`
+- [ ] Version in `manifest.json` is `1.2.0`
 - [ ] `npm test` — all 26 tests pass
 - [ ] No `console.log` in `app/app.js`, `app/daily-quote.js`, `app/quotes.js`
 - [ ] All icon files present: `icon16.png`, `icon32.png`, `icon48.png`, `icon128.png`
