@@ -29,6 +29,21 @@
   </div>
 </script>
 
+<script type="text/template" id="search-template">
+  <form class="web-search" role="search">
+    <input type="search" class="web-search-input" name="q" autocomplete="off" spellcheck="false"
+           placeholder="Search {{engineName}}" aria-label="Search the web">
+    <button type="submit" class="web-search-submit" aria-label="Search">
+      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="9" cy="9" r="6"></circle>
+          <line x1="13.5" y1="13.5" x2="17.5" y2="17.5"></line>
+        </g>
+      </svg>
+    </button>
+  </form>
+</script>
+
 <script type="text/template" id="quote-template">
   <figure class="daily-quote">
     <blockquote>
@@ -41,6 +56,12 @@
 </script>
 
 <button class="settings-btn" id="settings-btn" title="Settings" aria-label="Open settings">&#9881;</button>
+
+<div class="whats-new" id="whats-new" role="status" aria-live="polite" hidden>
+  <button type="button" class="whats-new-close" id="whats-new-close" aria-label="Dismiss">&#x2715;</button>
+  <p class="whats-new-title" id="whats-new-title"></p>
+  <p class="whats-new-body" id="whats-new-body"></p>
+</div>
 
 <div class="settings-overlay" id="settings-overlay" hidden>
   <div class="settings-panel" role="dialog" aria-label="Settings">
@@ -84,6 +105,37 @@
         <label class="settings-toggle-row">
           <span>Daily quote</span>
           <input type="checkbox" id="settings-quote-toggle" class="settings-checkbox">
+          <span class="settings-toggle-track"><span class="settings-toggle-thumb"></span></span>
+        </label>
+      </section>
+
+      <section class="settings-section">
+        <label class="settings-toggle-row">
+          <span>Search bar</span>
+          <input type="checkbox" id="settings-search-toggle" class="settings-checkbox">
+          <span class="settings-toggle-track"><span class="settings-toggle-thumb"></span></span>
+        </label>
+        <div class="settings-row settings-search-options" id="settings-search-options">
+          <select id="settings-search-engine" class="settings-select" aria-label="Search engine">
+            <option value="google">Google</option>
+            <option value="duckduckgo">DuckDuckGo</option>
+            <option value="bing">Bing</option>
+            <option value="yandex">Yandex</option>
+            <option value="yahoo">Yahoo</option>
+            <option value="brave">Brave</option>
+          </select>
+        </div>
+        <label class="settings-toggle-row settings-search-options" id="settings-search-newtab-row">
+          <span>Open in new tab</span>
+          <input type="checkbox" id="settings-search-newtab" class="settings-checkbox">
+          <span class="settings-toggle-track"><span class="settings-toggle-thumb"></span></span>
+        </label>
+      </section>
+
+      <section class="settings-section">
+        <label class="settings-toggle-row">
+          <span>Update tips</span>
+          <input type="checkbox" id="settings-updatetips-toggle" class="settings-checkbox">
           <span class="settings-toggle-track"><span class="settings-toggle-thumb"></span></span>
         </label>
       </section>

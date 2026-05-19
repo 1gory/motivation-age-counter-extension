@@ -23,20 +23,27 @@ Choose from three display modes:
 
 Every new tab also shows a daily quote from a curated collection of over 1500 quotes. A new quote appears each day and stays consistent throughout the day. The quote feature can be turned off in settings.
 
+Search the web right from your new tab:
+- Optional search bar with your choice of engine — Google, DuckDuckGo, Bing, Yandex, Yahoo, or Brave
+- Choose to open results in the current tab (like the default Chrome new tab) or in a new tab
+- The search bar is off by default — enable it in settings whenever you want it
+
 Make it yours:
 - Six restrained color palettes — three light (Classic, Warm Paper, Cool Mist) and three dark (Classic, Midnight, Graphite) — or follow the system theme automatically
 - Three font presets — Sans, Serif, and Mono
 - Three counter sizes — small, medium, or large
 
 All settings are accessible via the gear icon in the bottom-right corner, organized into two tabs:
-- Counter — display mode, target date, date of birth, daily quote toggle
+- Counter — display mode, target date, date of birth, daily quote, search bar with engine selection, update tips
 - Appearance — counter size, theme, font
+
+After each meaningful update, a small dismissible tip appears next to the gear icon so you know what is new. You can turn these tips off in settings.
 
 Privacy:
 Your birth date and preferences are stored only on your device using browser local storage. No data is sent to external servers or third parties. The extension requires no special permissions and works completely offline.
 
 Technical details:
-Built with Manifest V3 for modern Chrome browsers. The extension is lightweight and works fully offline — no external requests, no network calls, no tracking.
+Built with Manifest V3 for modern Chrome browsers. The extension is lightweight and works fully offline — no external requests, no network calls, no tracking. Web searches simply navigate your browser to the chosen search engine; no traffic is intercepted or relayed by the extension.
 
 This is an independent implementation inspired by Alex MacCaw's original 2013 extension concept, rewritten for current web standards and expanded with new counter modes.
 
@@ -77,7 +84,7 @@ Chrome Web Store allows up to 5 screenshots. Required size: **1280×800** (or 64
 | 1 | Counter — age mode, light | Default state, no quote |
 | 2 | Counter — age mode, dark | Dark mode, with daily quote |
 | 3 | Counter — countdown to date | "Until date" mode with a target date |
-| 4 | Settings panel open | All three modes visible, counter size buttons |
+| 4 | Settings panel open | Search bar + engine selector + Update tips visible in Counter tab |
 | 5 | Counter — countdown to year end | "Until end of year" mode |
 
 **Tip:** Screenshots 1 and 2 are the most important — they show the core experience. Settings screenshot (4) helps users understand the features before installing. You do not need to screenshot every state of the menu.
@@ -95,6 +102,8 @@ zip -r motivation-counter-v$(cat manifest.json | grep '"version"' | head -1 | se
   app/app.js \
   app/daily-quote.js \
   app/quotes.js \
+  app/search-engines.js \
+  app/whats-new.js \
   css/style.css \
   icons/ \
   LICENSE
@@ -127,8 +136,8 @@ zip -r motivation-counter-v$(cat manifest.json | grep '"version"' | head -1 | se
 
 ## Pre-publish checklist
 
-- [ ] Version in `manifest.json` is `1.2.0`
-- [ ] `npm test` — all 26 tests pass
+- [ ] Version in `manifest.json` matches `package.json`
+- [ ] `npm test` — all tests pass
 - [ ] No `console.log` in `app/app.js`, `app/daily-quote.js`, `app/quotes.js`
 - [ ] All icon files present: `icon16.png`, `icon32.png`, `icon48.png`, `icon128.png`
 - [ ] `tab-icon-32.png` present (used as favicon in dashboard.html)

@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { calculateAge, calculateCountdown, endOfYear, TemplateEngine, MILLISECONDS_PER_YEAR } from './app.js';
 import { hashDay, getQuoteOfTheDay } from './daily-quote.js';
+import { SEARCH_ENGINES, DEFAULT_ENGINE, buildSearchUrl } from './search-engines.js';
+import { getWhatsNew, isFirstInstall } from './whats-new.js';
 
 describe('MILLISECONDS_PER_YEAR', () => {
   it('equals 365.2425 days in milliseconds (Gregorian year)', () => {
@@ -186,5 +188,88 @@ describe('getQuoteOfTheDay', () => {
     }
     // With 1000+ quotes, every day should yield a unique quote
     expect(seen.size).toBe(365);
+  });
+});
+
+describe('buildSearchUrl', () => {
+  it('returns null for empty or whitespace-only queries', () => {
+    expect(buildSearchUrl('google', '')).toBeNull();
+    expect(buildSearchUrl('google', '   ')).toBeNull();
+    expect(buildSearchUrl('google', null)).toBeNull();
+    expect(buildSearchUrl('google', undefined)).toBeNull();
+  });
+
+  it('builds a Google URL with encoded query', () => {
+    expect(buildSearchUrl('google', 'hello world')).toBe(
+      'https://www.google.com/search?q=hello%20world'
+    );
+  });
+
+  it('trims surrounding whitespace before encoding', () => {
+    expect(buildSearchUrl('google', '  cats  ')).toBe(
+      'https://www.google.com/search?q=cats'
+    );
+  });
+
+  it('encodes special characters (&, =, +, /)', () => {
+    const url = buildSearchUrl('duckduckgo', 'a&b=c+d/e');
+    expect(url).toBe('https://duckduckgo.com/?q=a%26b%3Dc%2Bd%2Fe');
+  });
+
+  it('supports every defined engine', () => {
+    for (const key of Object.keys(SEARCH_ENGINES)) {
+      const url = buildSearchUrl(key, 'q');
+      expect(url).toContain(SEARCH_ENGINES[key].url);
+      expect(url.endsWith('q')).toBe(true);
+    }
+  });
+
+  it('falls back to the default engine for unknown keys', () => {
+    const url = buildSearchUrl('unknown-engine', 'foo');
+    expect(url.startsWith(SEARCH_ENGINES[DEFAULT_ENGINE].url)).toBe(true);
+  });
+
+  it('handles Cyrillic characters via percent-encoding', () => {
+    expect(buildSearchUrl('yandex', 'кот')).toBe(
+      'https://yandex.com/search/?text=%D0%BA%D0%BE%D1%82'
+    );
+  });
+});
+
+describe('isFirstInstall', () => {
+  it('is true when no stored version exists', () => {
+    expect(isFirstInstall(null)).toBe(true);
+    expect(isFirstInstall(undefined)).toBe(true);
+    expect(isFirstInstall('')).toBe(true);
+  });
+  it('is false when a stored version exists', () => {
+    expect(isFirstInstall('1.2.0')).toBe(false);
+  });
+});
+
+describe('getWhatsNew', () => {
+  const map = {
+    '1.3.0': { title: 'A', body: 'a' },
+    '1.4.0': { title: 'B', body: 'b' },
+  };
+
+  it('returns null when current version is missing from the map', () => {
+    expect(getWhatsNew('1.2.5', '1.2.0', map)).toBeNull();
+  });
+
+  it('returns null when seen version matches current', () => {
+    expect(getWhatsNew('1.3.0', '1.3.0', map)).toBeNull();
+  });
+
+  it('returns the entry when version is in the map and not yet seen', () => {
+    expect(getWhatsNew('1.3.0', '1.2.0', map)).toEqual({ title: 'A', body: 'a' });
+  });
+
+  it('returns the latest entry only — does not aggregate prior versions', () => {
+    expect(getWhatsNew('1.4.0', '1.2.0', map)).toEqual({ title: 'B', body: 'b' });
+  });
+
+  it('returns null when no current version is provided', () => {
+    expect(getWhatsNew(null, '1.2.0', map)).toBeNull();
   });
 });

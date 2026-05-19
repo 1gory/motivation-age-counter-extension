@@ -255,6 +255,66 @@ footer {
   justify-content: center;
 }
 
+/* Web search */
+.web-search {
+  display: flex;
+  align-items: center;
+  width: min(560px, 90vw);
+  margin: 2rem auto 0;
+  padding: 0 0.4rem 0 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 24px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  animation: quoteFadeIn 0.4s ease;
+}
+
+.web-search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.web-search-input {
+  flex: 1;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  font-size: 1rem;
+  padding: 0.7rem 0.25rem;
+  outline: none;
+}
+
+.web-search-input::placeholder {
+  color: var(--fg-subtle);
+}
+
+.web-search-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.web-search-submit {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  color: var(--fg-muted);
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.web-search-submit:hover {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
 /* Daily quote */
 .daily-quote {
   margin: 2rem auto 0;
@@ -314,6 +374,81 @@ footer {
 
 .settings-btn:hover {
   opacity: 0.85;
+}
+
+/* "What's new" tooltip — anchored above the settings gear */
+.whats-new {
+  position: fixed;
+  bottom: 3.6rem;
+  right: 1.1rem;
+  max-width: 260px;
+  padding: 0.7rem 2rem 0.75rem 0.9rem;
+  background: var(--panel-bg);
+  color: var(--fg);
+  border-radius: 10px;
+  box-shadow: var(--panel-shadow);
+  border: 1px solid var(--divider);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 90;
+}
+
+.whats-new[hidden] {
+  display: none;
+}
+
+.whats-new--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.whats-new::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  right: 14px;
+  width: 12px;
+  height: 12px;
+  background: var(--panel-bg);
+  border-right: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider);
+  transform: rotate(45deg);
+}
+
+.whats-new-title {
+  margin: 0 0 0.2rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--fg-subtle);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.whats-new-body {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--fg);
+}
+
+.whats-new-close {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.45rem;
+  background: none;
+  border: none;
+  color: var(--fg-subtle);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.15rem 0.3rem;
+  line-height: 1;
+  border-radius: 4px;
+}
+
+.whats-new-close:hover {
+  color: var(--fg);
+  background: var(--divider);
 }
 
 /* Settings overlay */
@@ -590,6 +725,56 @@ footer {
   background: var(--input-bg);
   color: var(--fg);
   margin: 0;
+}
+
+.settings-select {
+  font-family: inherit;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  padding: 0.3rem 1.6rem 0.3rem 0.55rem;
+  border: 1px solid var(--divider);
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'><path fill='none' stroke='%23999' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' d='M1 1l3 3 3-3'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.55rem center;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.settings-select:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.settings-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.settings-select option {
+  background-color: var(--panel-bg);
+  color: var(--fg);
+}
+
+.settings-search-options[hidden] {
+  display: none;
+}
+
+/* Engine selector lives on the right of its own row, like a value */
+.settings-row.settings-search-options {
+  justify-content: space-between;
+  margin-top: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+
+.settings-row.settings-search-options::before {
+  content: 'Engine';
+  font-size: 0.95rem;
+  color: var(--fg);
 }
 
 .settings-date--inline {

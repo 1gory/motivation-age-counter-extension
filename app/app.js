@@ -1,5 +1,7 @@
 import { getQuoteOfTheDay } from './daily-quote.js';
 import { QUOTES } from './quotes.js';
+import { SEARCH_ENGINES, DEFAULT_ENGINE, buildSearchUrl } from './search-engines.js';
+import { getWhatsNew, isFirstInstall } from './whats-new.js';
 
 export const MILLISECONDS_PER_YEAR = 365.2425 * 24 * 60 * 60 * 1000; // Gregorian year
 
@@ -36,6 +38,10 @@ export class App {
     this.yearEl = null;
     this.msEl = null;
     this.showQuote = true;
+    this.showSearch = true;
+    this.searchEngine = DEFAULT_ENGINE;
+    this.searchNewTab = false;
+    this.showUpdateTips = true;
     this.mode = 'age'; // 'age' | 'countdown-year' | 'countdown-date'
     this.countdownDate = null; // Date object for countdown-date mode
     this.counterSize = 'medium'; // 'small' | 'medium' | 'large'
@@ -57,6 +63,57 @@ export class App {
     }
 
     this.setupSettings();
+    this.maybeShowWhatsNew();
+  }
+
+  getExtensionVersion() {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime?.getManifest) {
+        return chrome.runtime.getManifest().version;
+      }
+    } catch {}
+    return null;
+  }
+
+  maybeShowWhatsNew() {
+    if (typeof document === 'undefined') return;
+    const current = this.getExtensionVersion();
+    if (!current) return;
+    const seen = localStorage.getItem('lastSeenVersion');
+
+    // First-time install: silently mark current version, do not show tip.
+    if (isFirstInstall(seen)) {
+      localStorage.setItem('lastSeenVersion', current);
+      return;
+    }
+
+    if (!this.showUpdateTips) return;
+
+    const entry = getWhatsNew(current, seen);
+    if (!entry) return;
+
+    this.showTooltip(entry);
+    localStorage.setItem('lastSeenVersion', current);
+  }
+
+  showTooltip({ title, body }) {
+    const el = document.getElementById('whats-new');
+    const titleEl = document.getElementById('whats-new-title');
+    const bodyEl = document.getElementById('whats-new-body');
+    const closeBtn = document.getElementById('whats-new-close');
+    if (!el || !titleEl || !bodyEl) return;
+    titleEl.textContent = title;
+    bodyEl.textContent = body;
+    el.hidden = false;
+    requestAnimationFrame(() => el.classList.add('whats-new--visible'));
+
+    const dismiss = () => {
+      el.classList.remove('whats-new--visible');
+      clearTimeout(autoHide);
+      setTimeout(() => { el.hidden = true; }, 200);
+    };
+    closeBtn?.addEventListener('click', dismiss, { once: true });
+    const autoHide = setTimeout(dismiss, 12000);
   }
 
   load() {
@@ -71,6 +128,11 @@ export class App {
 
   loadConfig() {
     this.showQuote = localStorage.getItem('showQuote') !== '0';
+    this.showSearch = localStorage.getItem('showSearch') === '1';
+    const storedEngine = localStorage.getItem('searchEngine');
+    this.searchEngine = SEARCH_ENGINES[storedEngine] ? storedEngine : DEFAULT_ENGINE;
+    this.searchNewTab = localStorage.getItem('searchNewTab') === '1';
+    this.showUpdateTips = localStorage.getItem('showUpdateTips') !== '0';
     this.mode = localStorage.getItem('mode') || 'age';
     const storedSize = localStorage.getItem('counterSize');
     this.counterSize = ['small', 'medium', 'large'].includes(storedSize) ? storedSize : 'medium';
@@ -90,6 +152,10 @@ export class App {
 
   saveConfig() {
     localStorage.setItem('showQuote', this.showQuote ? '1' : '0');
+    localStorage.setItem('showSearch', this.showSearch ? '1' : '0');
+    localStorage.setItem('searchEngine', this.searchEngine);
+    localStorage.setItem('searchNewTab', this.searchNewTab ? '1' : '0');
+    localStorage.setItem('showUpdateTips', this.showUpdateTips ? '1' : '0');
     localStorage.setItem('mode', this.mode);
     localStorage.setItem('counterSize', this.counterSize);
     localStorage.setItem('themeMode', this.themeMode);
@@ -145,6 +211,10 @@ export class App {
     this.yearEl = this.element.querySelector('.year');
     this.msEl = this.element.querySelector('.milliseconds');
 
+    if (this.showSearch) {
+      this.renderSearch();
+    }
+
     if (this.showQuote) {
       this.renderQuote();
     }
@@ -165,6 +235,35 @@ export class App {
       this.rafId = requestAnimationFrame(tick);
     };
     this.rafId = requestAnimationFrame(tick);
+  }
+
+  renderSearch() {
+    const engine = SEARCH_ENGINES[this.searchEngine] || SEARCH_ENGINES[DEFAULT_ENGINE];
+    const html = this.getTemplate('search')({ engineName: engine.name });
+    this.element.insertAdjacentHTML('beforeend', html);
+    const form = this.element.querySelector('.web-search');
+    if (!form) return;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = form.querySelector('.web-search-input');
+      const url = buildSearchUrl(this.searchEngine, input?.value);
+      if (!url) return;
+      if (this.searchNewTab) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        window.location.assign(url);
+      }
+    });
+  }
+
+  refreshSearch() {
+    const existing = this.element.querySelector('.web-search');
+    if (existing) existing.remove();
+    if (this.showSearch && this.dob) {
+      const quote = this.element.querySelector('.daily-quote');
+      this.renderSearch();
+      if (quote) this.element.appendChild(quote);
+    }
   }
 
   renderQuote() {
@@ -225,6 +324,19 @@ export class App {
   updateSettingsUI() {
     const checkbox = document.getElementById('settings-quote-toggle');
     if (checkbox) checkbox.checked = this.showQuote;
+
+    const searchToggle = document.getElementById('settings-search-toggle');
+    if (searchToggle) searchToggle.checked = this.showSearch;
+    const engineSelect = document.getElementById('settings-search-engine');
+    if (engineSelect) engineSelect.value = this.searchEngine;
+    const newTabToggle = document.getElementById('settings-search-newtab');
+    if (newTabToggle) newTabToggle.checked = this.searchNewTab;
+    document.querySelectorAll('.settings-search-options').forEach(el => {
+      el.hidden = !this.showSearch;
+    });
+
+    const updateTipsToggle = document.getElementById('settings-updatetips-toggle');
+    if (updateTipsToggle) updateTipsToggle.checked = this.showUpdateTips;
 
     const radios = document.querySelectorAll('input[name="mode"]');
     radios.forEach(r => { r.checked = r.value === this.mode; });
@@ -297,6 +409,35 @@ export class App {
       this.save();
       closePanel();
       this.renderAgeLoop();
+    });
+
+    // Search toggle / engine / target
+    const searchToggle = document.getElementById('settings-search-toggle');
+    const engineSelect = document.getElementById('settings-search-engine');
+    const newTabToggle = document.getElementById('settings-search-newtab');
+
+    searchToggle?.addEventListener('change', () => {
+      this.showSearch = searchToggle.checked;
+      this.saveConfig();
+      this.refreshSearch();
+      this.updateSettingsUI();
+    });
+
+    engineSelect?.addEventListener('change', () => {
+      this.searchEngine = SEARCH_ENGINES[engineSelect.value] ? engineSelect.value : DEFAULT_ENGINE;
+      this.saveConfig();
+      this.refreshSearch();
+    });
+
+    newTabToggle?.addEventListener('change', () => {
+      this.searchNewTab = newTabToggle.checked;
+      this.saveConfig();
+    });
+
+    const updateTipsToggle = document.getElementById('settings-updatetips-toggle');
+    updateTipsToggle?.addEventListener('change', () => {
+      this.showUpdateTips = updateTipsToggle.checked;
+      this.saveConfig();
     });
 
     // Quote toggle
