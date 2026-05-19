@@ -76,13 +76,20 @@ in the PR description so future-you can see it was considered.
 ### 5. Screenshots (Chrome Web Store)
 Required size: **1280×800**, JPG. Up to 5 slots.
 
-For every changed UI surface:
-- [ ] Identify which numbered screenshot it affects (see the table in
-      `STORE_LISTING.md` → *Screenshots guide*)
-- [ ] Take the new screenshot (full-page screenshot of the new tab in Chrome,
-      then crop or resize to 1280×800)
-- [ ] Replace the file in `images/screenshots/screenshot_1280x800_N.jpg`
-- [ ] Keep the file name — the README and store listing refer to it
+**Audit all five slots, not only the one obviously affected.** A new feature
+that touches the counter, the quote, the search bar, or the settings panel
+may also be visible in screenshots 1, 2, 3, or 5 even if you "only" added a
+search bar. Lesson from 1.3.0: only screenshot 4 was refreshed but the
+search bar was missing from 1, 2, 3, 5 too.
+
+For every screenshot slot:
+- [ ] Open `images/screenshots/screenshot_1280x800_N.jpg`, compare against
+      the current UI in Chrome. If anything in the screenshot is now stale
+      (theme, mode label, presence/absence of a feature), refresh it.
+- [ ] Replace the file, keep the same file name (README and store listing
+      reference it by path).
+- [ ] Also audit the small promo tile
+      `images/screenshots/screenshot_440x280_1.jpg`.
 
 **Quick resize recipe** (macOS, `sips`):
 ```bash
@@ -93,12 +100,22 @@ sips --cropToHeightWidth 800 1280 /tmp/r.png --out /tmp/c.png
 sips -s format jpeg -s formatOptions 85 /tmp/c.png --out "$DST"
 ```
 
-Don't forget the small tile if the visual identity changed:
-- [ ] `images/screenshots/screenshot_440x280_1.jpg` (small promo tile)
-
 ### 6. README
-- [ ] If a feature is shown in the README, update the matching paragraph and
-      screenshot reference
+- [ ] Search `README.md` for every mention of a feature this release touches
+      (`grep -i 'search\|quote\|theme\|font'` for example). Update copy and
+      screenshot captions.
+- [ ] Update the feature list and any "version 1.x adds…" line if present.
+- [ ] If you do not update README in the same PR, you must open a follow-up
+      and link it from the release notes — do not silently skip.
+
+### 6b. IDEAS.md / ai-tasks/
+- [ ] Open `ai-tasks/IDEAS.md`. For every idea this release implements,
+      append a `**Shipped in vX.Y.Z**` line at the top of that idea's
+      section (or remove the section entirely). Reason: future-you needs to
+      know what is still open at a glance, and shipped ideas blocking the
+      list is the most common drift.
+- [ ] If the release closes any other tasks documents in `ai-tasks/`,
+      archive or delete them.
 
 ### 7. Tests
 - [ ] If new logic was added (URL builder, version comparator, etc.), add
@@ -139,20 +156,65 @@ unzip -l motivation-counter-v${VERSION}.zip
 `ai-tasks/`.
 
 ### 10. Chrome Web Store dashboard
-- [ ] Upload the ZIP under "Package"
-- [ ] Replace any changed screenshots in the listing
-- [ ] Update the description text if `STORE_LISTING.md` changed
-- [ ] Hit "Submit for review"
+- [ ] Upload the ZIP under "Package".
+- [ ] Replace **every** stale screenshot in the listing (not only the one
+      you obviously changed — re-audit per step 5).
+- [ ] Update the description text if `STORE_LISTING.md` changed.
+- [ ] Fill the **What's new in this version** field (CWS shows it on the
+      listing). Use 1–3 sentences from the GitHub release notes.
+- [ ] Confirm Privacy practices if CWS asks (same answers as last time
+      unless permissions changed).
+- [ ] Hit **Submit for review**.
 
-### 11. After publish
-- [ ] Wait for the email confirming the update is live (usually a few hours
-      to a couple of days)
+### 11. GitHub Release
+The git tag is not enough — wrap it in a GitHub Release so users (and
+Dependabot, and changelog aggregators) can see it.
+
+- [ ] Open `https://github.com/<owner>/<repo>/releases/new`.
+- [ ] Choose existing tag `vX.Y.Z` (do not create a new one — it is
+      already on the right commit).
+- [ ] Title: `vX.Y.Z — <one-line summary>`.
+- [ ] Body: copy the "Highlights / Defaults / Under the hood / Install"
+      sections from the previous release as a template, then update.
+- [ ] Attach `motivation-counter-vX.Y.Z.zip` so people can sideload
+      without waiting for CWS review.
+- [ ] Tick **Set as the latest release**. Leave pre-release unchecked.
+- [ ] Publish.
+
+### 12. After publish
+- [ ] Wait for the email confirming the CWS update is live (usually a few
+      hours to a couple of days).
 - [ ] Open the listing URL and verify the version number, screenshots, and
-      description match expectations
+      description match expectations.
+- [ ] Install the live version (not your unpacked dev build), open a new
+      tab, and confirm the `WHATS_NEW` tooltip fires once. If it does not,
+      open DevTools on the new tab and run
+      `localStorage.removeItem('lastSeenVersion'); location.reload()` to
+      simulate a first-update flow.
 - [ ] Delete the local ZIP (`rm motivation-counter-v*.zip`) so it does not
-      drift out of sync next release
+      drift out of sync next release.
 
 ---
+
+## Things we forgot before — do not forget again
+
+A running log of mistakes from past releases. Read this before each release,
+add to it after each release.
+
+- **1.3.0** — only screenshot 4 was refreshed; the search bar was missing
+  from screenshots 1, 2, 3, 5. Lesson: step 5 now says "audit all five
+  slots, not only the obvious one."
+- **1.3.0** — `package.json` was at 1.0.4 while `manifest.json` was at
+  1.2.0. Lesson: step 2 enforces both must match.
+- **1.3.0** — `README.md` was not updated for the new search/tooltip
+  features. Lesson: step 6 now requires a grep pass and a follow-up issue
+  if not done in the same PR.
+- **1.3.0** — `ai-tasks/IDEAS.md` still listed ideas 1 and 3 as open after
+  they shipped. Lesson: step 6b explicitly requires grooming.
+- **1.3.0** — GitHub Release was not created automatically after the tag
+  push. Lesson: step 11 is now its own checklist item.
+- **1.3.0** — The CWS "What's new in this version" field was not filled.
+  Lesson: step 10 calls it out.
 
 ## When in doubt: ask Claude
 
