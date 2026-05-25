@@ -117,6 +117,23 @@ sips -s format jpeg -s formatOptions 85 /tmp/c.png --out "$DST"
 - [ ] If the release closes any other tasks documents in `ai-tasks/`,
       archive or delete them.
 
+### 6c. GitHub Pages (docs/)
+The project ships a landing page from the `docs/` folder on `main`
+(GitHub Pages → Settings → Pages → source: `main` / `/docs`). It is easy to
+forget because it lives outside the extension code and nothing breaks if it
+goes stale.
+
+- [ ] Open `docs/index.html`. Audit the **feature cards** and the **tagline**
+      against the current `STORE_LISTING.md` — every user-visible feature this
+      release touched (search bar, themes, fonts, sizes, new counter modes…)
+      must be reflected. This is the same drift trap as the README.
+- [ ] Update `docs/icon128.png` if the icon changed.
+- [ ] If the Chrome Web Store listing URL or slug changed, fix the CWS links
+      in both `docs/index.html` and `docs/privacy-policy.html`.
+- [ ] If the privacy policy text changed, mirror it in `docs/privacy-policy.html`.
+- [ ] After push, open `https://1gory.github.io/motivation-age-counter-extension/`
+      and confirm the page reflects this release.
+
 ### 7. Tests
 - [ ] If new logic was added (URL builder, version comparator, etc.), add
       tests in `app/app.test.js`
@@ -213,6 +230,11 @@ add to it after each release.
   they shipped. Lesson: step 6b explicitly requires grooming.
 - **1.3.0** — GitHub Release was not created automatically after the tag
   push. Lesson: step 11 is now its own checklist item.
+- **pre-1.3.x** — the GitHub Pages landing page (`docs/index.html`) was
+  completely forgotten across releases: it still advertised only age /
+  countdown / quote / privacy and never mentioned the search bar or the
+  theme / font / size customisation shipped in 1.3.0. Lesson: step 6c now
+  audits `docs/` against `STORE_LISTING.md` every release.
 - **1.3.0** — The CWS "What's new in this version" field was not filled.
   Lesson: step 10 calls it out.
 

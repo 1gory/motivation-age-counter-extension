@@ -24,7 +24,7 @@ Choose from three display modes:
 Every new tab also shows a daily quote from a curated collection of over 1500 quotes. A new quote appears each day and stays consistent throughout the day. The quote feature can be turned off in settings.
 
 Search the web right from your new tab:
-- Optional search bar with your choice of engine — Google, DuckDuckGo, Bing, Yandex, Yahoo, or Brave
+- Optional search bar with a choice of popular search engines
 - Choose to open results in the current tab (like the default Chrome new tab) or in a new tab
 - The search bar is off by default — enable it in settings whenever you want it
 
