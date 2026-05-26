@@ -459,6 +459,8 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
   z-index: 100;
 }
 
@@ -474,6 +476,8 @@ footer {
   padding: 2rem 2rem 1.5rem;
   min-width: 320px;
   max-width: 360px;
+  max-height: 100%;
+  overflow-y: auto;
   box-shadow: var(--panel-shadow);
 }
 
@@ -865,6 +869,19 @@ footer {
   margin-top: 0.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--divider);
+}
+
+.settings-tabcount {
+  margin: 0 0 0.85rem;
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.settings-tabcount strong {
+  color: var(--fg);
+  font-weight: 600;
 }
 
 .settings-feedback {

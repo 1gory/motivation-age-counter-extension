@@ -26,6 +26,9 @@ All credit for the original concept, design, and implementation belongs to Alex 
   - **Until end of year** — countdown to December 31
   - **Until date** — countdown to any date you choose
 - Daily quote — a new quote each day from a curated collection
+- Optional web search bar with a choice of engines
+- Six color palettes, three fonts, and three counter sizes
+- Tracks how many new tabs you have opened with the extension (shown in settings)
 - Clean, minimalist design that adapts to light and dark mode
 - Completely private — all data stays in your browser
 
@@ -36,7 +39,11 @@ Click the ⚙ icon in the bottom-right corner to:
 - Set a target date for countdown
 - Change your date of birth
 - Toggle the daily quote
-- Adjust counter size (S / M / L)
+- Enable the web search bar and pick a search engine
+- Choose a theme, color palette, font, and counter size (S / M / L)
+- Toggle update tips
+
+The footer of the settings panel also shows how many new tabs you have opened with the extension.
 
 ## Privacy & Technical Details
 
@@ -92,10 +99,12 @@ npm test
 
 ### Package for release
 ```bash
-zip -r motivation-counter-v1.1.1.zip manifest.json dashboard.html css/ icons/ app/app.js app/daily-quote.js app/quotes.js
+zip -r motivation-counter-v1.4.0.zip \
+  manifest.json dashboard.html css/style.css icons/ LICENSE \
+  app/app.js app/daily-quote.js app/quotes.js app/search-engines.js app/whats-new.js
 ```
 
-The zip includes only the files required by the extension. Do **not** include `node_modules/`, `app/app.test.js`, screenshots, or any markdown files.
+The zip includes only the files required by the extension. Do **not** include `node_modules/`, `app/app.test.js`, screenshots, or any markdown files. See `RELEASE.md` for the authoritative packaging step.
 
 ## Legal & Disclaimer
 

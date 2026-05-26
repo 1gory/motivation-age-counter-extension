@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateAge, calculateCountdown, endOfYear, TemplateEngine, MILLISECONDS_PER_YEAR } from './app.js';
+import { calculateAge, calculateCountdown, endOfYear, incrementTabCount, TemplateEngine, MILLISECONDS_PER_YEAR } from './app.js';
 import { hashDay, getQuoteOfTheDay } from './daily-quote.js';
 import { SEARCH_ENGINES, DEFAULT_ENGINE, buildSearchUrl } from './search-engines.js';
 import { getWhatsNew, isFirstInstall } from './whats-new.js';
@@ -114,6 +114,38 @@ describe('endOfYear', () => {
   it('is always in the future relative to a mid-year date', () => {
     const now = new Date('2026-06-15T00:00:00');
     expect(endOfYear(now) > now).toBe(true);
+  });
+});
+
+describe('incrementTabCount', () => {
+  const makeStorage = (initial = {}) => {
+    const data = { ...initial };
+    return {
+      getItem: (k) => (k in data ? data[k] : null),
+      setItem: (k, v) => { data[k] = String(v); },
+    };
+  };
+
+  it('starts at 1 when no value is stored', () => {
+    const storage = makeStorage();
+    expect(incrementTabCount(storage)).toBe(1);
+    expect(storage.getItem('tabsOpened')).toBe('1');
+  });
+
+  it('increments an existing count', () => {
+    const storage = makeStorage({ tabsOpened: '41' });
+    expect(incrementTabCount(storage)).toBe(42);
+    expect(storage.getItem('tabsOpened')).toBe('42');
+  });
+
+  it('recovers from a corrupted (non-numeric) value', () => {
+    const storage = makeStorage({ tabsOpened: 'oops' });
+    expect(incrementTabCount(storage)).toBe(1);
+  });
+
+  it('treats negative values as zero before incrementing', () => {
+    const storage = makeStorage({ tabsOpened: '-5' });
+    expect(incrementTabCount(storage)).toBe(1);
   });
 });
 

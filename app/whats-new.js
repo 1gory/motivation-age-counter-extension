@@ -3,6 +3,10 @@ export const WHATS_NEW = {
     title: "What's new",
     body: 'You can now enable a search bar and pick your engine. Open Settings to try it.',
   },
+  '1.4.0': {
+    title: "What's new",
+    body: "See how many new tabs you've opened with the extension — check the count in Settings.",
+  },
 };
 
 export function getWhatsNew(currentVersion, seenVersion, map = WHATS_NEW) {

@@ -37,6 +37,8 @@ All settings are accessible via the gear icon in the bottom-right corner, organi
 - Counter — display mode, target date, date of birth, daily quote, search bar with engine selection, update tips
 - Appearance — counter size, theme, font
 
+The settings panel also shows a small running tally of how many new tabs you have opened with the extension — a quiet nudge that the time really is adding up.
+
 After each meaningful update, a small dismissible tip appears next to the gear icon so you know what is new. You can turn these tips off in settings.
 
 Privacy:
@@ -84,7 +86,7 @@ Chrome Web Store allows up to 5 screenshots. Required size: **1280×800** (or 64
 | 1 | Counter — age mode, light | Default state, no quote |
 | 2 | Counter — age mode, dark | Dark mode, with daily quote |
 | 3 | Counter — countdown to date | "Until date" mode with a target date |
-| 4 | Settings panel open | Search bar + engine selector + Update tips visible in Counter tab |
+| 4 | Settings panel open | Search bar + engine selector + Update tips in Counter tab; "Tabs opened" tally visible in the footer |
 | 5 | Counter — countdown to year end | "Until end of year" mode |
 
 **Tip:** Screenshots 1 and 2 are the most important — they show the core experience. Settings screenshot (4) helps users understand the features before installing. You do not need to screenshot every state of the menu.

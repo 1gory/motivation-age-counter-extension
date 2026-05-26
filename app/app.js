@@ -24,6 +24,15 @@ export function endOfYear(now = new Date()) {
   return new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
 }
 
+// Bumps the lifetime "tabs opened" counter by one and returns the new total.
+// Called once per dashboard load (each new tab instantiates a fresh App).
+export function incrementTabCount(storage) {
+  const prev = parseInt(storage.getItem('tabsOpened'), 10);
+  const next = (Number.isFinite(prev) && prev >= 0 ? prev : 0) + 1;
+  storage.setItem('tabsOpened', String(next));
+  return next;
+}
+
 export class TemplateEngine {
   static compile(template) {
     return (data = {}) => template.replace(/\{\{(\w+)\}\}/g, (match, key) => data[key] ?? '');
@@ -51,9 +60,14 @@ export class App {
     this.font = 'sans'; // 'sans' | 'serif' | 'mono'
     this.darkMql = null;
     this.darkMqlHandler = null;
+    this.tabsOpened = 0;
 
     this.load();
     this.loadConfig();
+
+    if (typeof localStorage !== 'undefined') {
+      this.tabsOpened = incrementTabCount(localStorage);
+    }
     this.element.addEventListener('submit', this.handleSubmit.bind(this));
 
     if (this.dob) {
@@ -113,7 +127,7 @@ export class App {
       setTimeout(() => { el.hidden = true; }, 200);
     };
     closeBtn?.addEventListener('click', dismiss, { once: true });
-    const autoHide = setTimeout(dismiss, 12000);
+    const autoHide = setTimeout(dismiss, 5000);
   }
 
   load() {
@@ -361,6 +375,9 @@ export class App {
     document.querySelectorAll('[data-font]').forEach(btn => {
       btn.classList.toggle('font-option--active', btn.dataset.font === this.font);
     });
+
+    const tabCountEl = document.getElementById('settings-tabcount-value');
+    if (tabCountEl) tabCountEl.textContent = this.tabsOpened.toLocaleString();
   }
 
   setupSettings() {
