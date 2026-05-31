@@ -24,6 +24,40 @@ export function endOfYear(now = new Date()) {
   return new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
 }
 
+// Parses a 'YYYY-MM-DD' string into a Date at LOCAL midnight.
+// `new Date('YYYY-MM-DD')` parses as UTC midnight, which shifts the calendar
+// day in negative-UTC timezones; building from components keeps it local so the
+// countdown target aligns with the local label (toLocaleDateString) and endOfYear.
+// Returns null for malformed input.
+export function parseLocalDate(str) {
+  if (typeof str !== 'string') return null;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str.trim());
+  if (!match) return null;
+  const [, y, m, d] = match;
+  const year = Number(y);
+  const month = Number(m) - 1;
+  const day = Number(d);
+  const date = new Date(year, month, day);
+  if (isNaN(date)) return null;
+  // Reject overflow dates (e.g. 2030-02-31) that the Date constructor silently
+  // normalizes into the following month.
+  if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
+    return null;
+  }
+  return date;
+}
+
+// Formats a Date as a 'YYYY-MM-DD' string using its LOCAL calendar components.
+// Inverse of parseLocalDate; avoids the UTC shift of Date.toISOString().slice(0,10)
+// when populating a <input type="date"> from a local-midnight Date.
+export function formatLocalDate(date) {
+  if (!(date instanceof Date) || isNaN(date)) return '';
+  const y = String(date.getFullYear()).padStart(4, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 // Bumps the lifetime "tabs opened" counter by one and returns the new total.
 // Called once per dashboard load (each new tab instantiates a fresh App).
 export function incrementTabCount(storage) {
@@ -360,7 +394,7 @@ export class App {
 
     const cdInput = document.getElementById('settings-countdown-date');
     if (cdInput && this.countdownDate) {
-      cdInput.value = this.countdownDate.toISOString().slice(0, 10);
+      cdInput.value = formatLocalDate(this.countdownDate);
     }
 
     document.querySelectorAll('[data-theme-mode]').forEach(btn => {
@@ -480,7 +514,7 @@ export class App {
         if (this.mode === 'countdown-date') {
           if (!this.countdownDate && !cdInput?.value) return;
           if (cdInput?.value) {
-            this.countdownDate = new Date(cdInput.value);
+            this.countdownDate = parseLocalDate(cdInput.value);
           }
         }
 
@@ -565,7 +599,8 @@ export class App {
     // Countdown date input change
     cdInput?.addEventListener('change', () => {
       if (!cdInput.value) return;
-      this.countdownDate = new Date(cdInput.value);
+      this.countdownDate = parseLocalDate(cdInput.value);
+      if (!this.countdownDate) return;
       this.saveConfig();
       if (this.mode === 'countdown-date') this.renderAgeLoop();
     });

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateAge, calculateCountdown, endOfYear, incrementTabCount, TemplateEngine, MILLISECONDS_PER_YEAR } from './app.js';
+import { calculateAge, calculateCountdown, endOfYear, incrementTabCount, TemplateEngine, MILLISECONDS_PER_YEAR, parseLocalDate, formatLocalDate } from './app.js';
 import { hashDay, getQuoteOfTheDay } from './daily-quote.js';
 import { SEARCH_ENGINES, DEFAULT_ENGINE, buildSearchUrl } from './search-engines.js';
 import { getWhatsNew, isFirstInstall } from './whats-new.js';
@@ -114,6 +114,82 @@ describe('endOfYear', () => {
   it('is always in the future relative to a mid-year date', () => {
     const now = new Date('2026-06-15T00:00:00');
     expect(endOfYear(now) > now).toBe(true);
+  });
+});
+
+describe('parseLocalDate', () => {
+  it('parses YYYY-MM-DD to a Date at LOCAL midnight', () => {
+    const d = parseLocalDate('2030-01-01');
+    expect(d).toBeInstanceOf(Date);
+    expect(d.getFullYear()).toBe(2030);
+    expect(d.getMonth()).toBe(0);
+    expect(d.getDate()).toBe(1);
+    expect(d.getHours()).toBe(0);
+    expect(d.getMinutes()).toBe(0);
+  });
+
+  it('keeps the local calendar day regardless of timezone (no UTC shift)', () => {
+    // new Date('2030-12-31') would be UTC midnight; in negative-UTC zones its
+    // local getDate() rolls back to the 30th. parseLocalDate must stay on the 31st.
+    const d = parseLocalDate('2030-12-31');
+    expect(d.getFullYear()).toBe(2030);
+    expect(d.getMonth()).toBe(11);
+    expect(d.getDate()).toBe(31);
+  });
+
+  it('returns null for malformed or non-string input', () => {
+    expect(parseLocalDate('')).toBeNull();
+    expect(parseLocalDate('not-a-date')).toBeNull();
+    expect(parseLocalDate('2030/01/01')).toBeNull();
+    expect(parseLocalDate('2030-1-1')).toBeNull();
+    expect(parseLocalDate(null)).toBeNull();
+    expect(parseLocalDate(undefined)).toBeNull();
+    expect(parseLocalDate(20300101)).toBeNull();
+  });
+
+  it('returns null for an impossible calendar date', () => {
+    expect(parseLocalDate('2030-02-31')).toBeNull();
+  });
+});
+
+describe('formatLocalDate', () => {
+  it('formats a local-midnight Date back to YYYY-MM-DD without UTC shift', () => {
+    const d = new Date(2030, 11, 31); // local Dec 31
+    expect(formatLocalDate(d)).toBe('2030-12-31');
+  });
+
+  it('round-trips with parseLocalDate', () => {
+    for (const s of ['2030-01-01', '2026-12-31', '1999-06-15']) {
+      expect(formatLocalDate(parseLocalDate(s))).toBe(s);
+    }
+  });
+
+  it('returns empty string for invalid input', () => {
+    expect(formatLocalDate(new Date('invalid'))).toBe('');
+    expect(formatLocalDate('2030-01-01')).toBe('');
+    expect(formatLocalDate(null)).toBe('');
+  });
+});
+
+describe('countdown-date target alignment (regression: no off-by-one)', () => {
+  it('counts down to the exact local calendar day picked, not a UTC-shifted day', () => {
+    const target = parseLocalDate('2030-01-01');
+    // "Now" is the local midnight of the day before the target.
+    const now = new Date(2029, 11, 31, 0, 0, 0, 0);
+    const { yearPart, decimalPart } = calculateCountdown(target, now);
+    expect(yearPart).toBe('0');
+    expect(decimalPart).toHaveLength(9);
+
+    // The remaining duration must be exactly one calendar day (86,400,000 ms),
+    // proving the target landed on Jan 1 local — not Dec 31 (which would be <= 0).
+    expect(target - now).toBe(86400000);
+  });
+
+  it('the countdown label day matches the parsed target day', () => {
+    const target = parseLocalDate('2030-01-01');
+    // The same value the UI feeds toLocaleDateString for the "UNTIL ..." label.
+    expect(target.getMonth()).toBe(0);
+    expect(target.getDate()).toBe(1);
   });
 });
 
