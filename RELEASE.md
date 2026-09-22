@@ -237,6 +237,20 @@ add to it after each release.
   audits `docs/` against `STORE_LISTING.md` every release.
 - **1.3.0** — The CWS "What's new in this version" field was not filled.
   Lesson: step 10 calls it out.
+- **1.5.0** — The ZIP was uploaded to the Chrome Web Store while the code was
+  still uncommitted: no commit, no `v1.5.0` tag, nothing pushed. For a while
+  the published artifact matched no point in the history. It was caught only
+  because someone asked. Lesson: **step 8 comes before step 10, and the order
+  is not cosmetic.** Never build a ZIP from a dirty working tree — run
+  `git status` first, and if it is not clean, stop and commit.
+- **1.5.0** — Screenshots 3 and 4 were knowingly skipped (the countdown label
+  can now carry a time, and the settings panel gained two "Set time" toggles),
+  so the live listing shows a UI that no longer exists. Deliberate, not an
+  accident — but it still has to be paid off. Lesson: refresh slots 3 and 4
+  next release, before adding anything new to step 5's backlog.
+- **1.5.0** — `docs/` no longer exists (removed in `3a94f25`), so step 6c is
+  permanently n/a until GitHub Pages is restored. Left in place rather than
+  deleted: if the landing page ever comes back, the trap comes back with it.
 
 ## When in doubt: ask Claude
 
