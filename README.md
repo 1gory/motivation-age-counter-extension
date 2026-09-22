@@ -24,7 +24,7 @@ All credit for the original concept, design, and implementation belongs to Alex 
 - Three display modes (switchable in settings):
   - **Age counter** — shows your age in years with millisecond precision
   - **Until end of year** — countdown to December 31
-  - **Until date** — countdown to any date you choose
+  - **Until date** — countdown to any date you choose, optionally down to a time of day
 - Daily quote — a new quote each day from a curated collection
 - Optional web search bar with a choice of engines
 - Six color palettes, three fonts, and three counter sizes
@@ -36,8 +36,8 @@ All credit for the original concept, design, and implementation belongs to Alex 
 
 Click the ⚙ icon in the bottom-right corner to:
 - Switch display mode
-- Set a target date for countdown
-- Change your date of birth
+- Set a target date for countdown, and optionally a time of day
+- Change your date of birth, and optionally your time of birth
 - Toggle the daily quote
 - Enable the web search bar and pick a search engine
 - Choose a theme, color palette, font, and counter size (S / M / L)
@@ -99,7 +99,7 @@ npm test
 
 ### Package for release
 ```bash
-zip -r motivation-counter-v1.4.0.zip \
+zip -r motivation-counter-v1.5.0.zip \
   manifest.json dashboard.html css/style.css icons/ LICENSE \
   app/app.js app/daily-quote.js app/quotes.js app/search-engines.js app/whats-new.js
 ```

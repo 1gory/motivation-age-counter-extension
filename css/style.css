@@ -130,6 +130,21 @@
   --track-off: #48484A;
 }
 
+/* Tells the browser which way to paint native controls. Without it the
+   calendar and clock picker icons inside date/time inputs stay black, which
+   is invisible against a dark panel. */
+.theme-light-classic,
+.theme-light-warm,
+.theme-light-mist {
+  color-scheme: light;
+}
+
+.theme-dark-classic,
+.theme-dark-midnight,
+.theme-dark-graphite {
+  color-scheme: dark;
+}
+
 /* ---- Font presets ---- */
 .font-sans {
   --font-family: 'Helvetica Neue', 'Avenir', helvetica, arial, sans-serif;
@@ -781,11 +796,23 @@ footer {
   color: var(--fg);
 }
 
-.settings-date--inline {
-  flex: none;
-  font-size: 0.85rem;
-  padding: 0.2rem 0.4rem;
-  margin-left: auto;
+/* Countdown target date/time, revealed under the "Until date" radio */
+.settings-subsection {
+  margin-top: 0.6rem;
+  padding-left: 1.5rem;
+}
+
+/* .settings-row sets display:flex, which outranks the UA [hidden] rule,
+   so rows that toggle need to say display:none explicitly. */
+.settings-subsection[hidden],
+.settings-time-row[hidden] {
+  display: none;
+}
+
+/* A time field only ever holds HH:MM. Letting it stretch made it wider than
+   the date field above it, which shares its row with the Save button. */
+.settings-time-row .settings-date {
+  flex: 0 0 auto;
 }
 
 .settings-save {

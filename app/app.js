@@ -58,6 +58,94 @@ export function formatLocalDate(date) {
   return `${y}-${m}-${d}`;
 }
 
+// Parses an 'HH:MM' string (the value an <input type="time"> produces) into
+// its components. Some browsers append ':SS' when a step is configured, so
+// seconds are tolerated and discarded. Returns null for malformed input.
+export function parseLocalTime(str) {
+  if (typeof str !== 'string') return null;
+  const match = /^(\d{2}):(\d{2})(?::\d{2})?$/.exec(str.trim());
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) return null;
+  return { hours, minutes };
+}
+
+// Combines a 'YYYY-MM-DD' date with an optional 'HH:MM' time into a LOCAL Date.
+// A missing or empty time means local midnight — the pre-1.5.0 behaviour, which
+// is what users who leave the "Set time" toggle off still get.
+// Returns null if either part is malformed.
+export function parseLocalDateTime(dateStr, timeStr) {
+  const date = parseLocalDate(dateStr);
+  if (!date) return null;
+  if (timeStr == null || timeStr === '') return date;
+  const time = parseLocalTime(timeStr);
+  if (!time) return null;
+  date.setHours(time.hours, time.minutes, 0, 0);
+  return date;
+}
+
+// Formats a Date's LOCAL wall-clock time as 'HH:MM' for an <input type="time">.
+// Inverse of the time half of parseLocalDateTime.
+export function formatLocalTime(date) {
+  if (!(date instanceof Date) || isNaN(date)) return '';
+  const h = String(date.getHours()).padStart(2, '0');
+  const m = String(date.getMinutes()).padStart(2, '0');
+  return `${h}:${m}`;
+}
+
+// Builds the "UNTIL ..." heading for countdown-date mode. The time is only
+// shown when the user explicitly set one, so the common date-only case stays
+// as terse as it was before.
+export function formatCountdownLabel(date, hasTime = false) {
+  if (!(date instanceof Date) || isNaN(date)) return '';
+  const day = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  if (!hasTime) return `UNTIL ${day}`.toUpperCase();
+  const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return `UNTIL ${day}, ${time}`.toUpperCase();
+}
+
+// Reads a millisecond timestamp out of localStorage.
+// parseInt alone is not enough: a value like '1e20' parses to a finite number
+// that Date cannot represent, yielding an Invalid Date that only blows up later
+// (toISOString throws, which used to take the whole settings panel down).
+export function parseStoredDate(raw) {
+  if (raw == null) return null;
+  const str = String(raw).trim();
+  // Must be an integer end to end. parseInt would happily read '1e20' as 1 and
+  // '12abc' as 12, silently turning corrupted storage into a plausible date.
+  // The leading '-' matters: any date of birth before 1970 is negative.
+  if (!/^-?\d+$/.test(str)) return null;
+  const ms = Number(str);
+  if (!Number.isFinite(ms)) return null;
+  const date = new Date(ms);
+  return isNaN(date) ? null : date;
+}
+
+// Migrates a pre-1.5.0 date of birth.
+// Those builds stored the DOB as UTC midnight of the picked calendar day
+// (`input.valueAsDate` / `new Date('YYYY-MM-DD')`), which sits hours away from
+// the local midnight the user meant — the same off-by-one fixed for countdown
+// targets in 1.4.1. Re-anchors to local midnight of that same calendar day.
+// Returns null if the stored value is unusable.
+export function normalizeLegacyDob(timestamp) {
+  const utc = new Date(timestamp);
+  if (isNaN(utc)) return null;
+  // Already sitting on a local midnight, so either it has been migrated or the
+  // reader is in UTC and there was nothing to migrate. Returning it unchanged
+  // keeps this safe to apply twice: otherwise a second pass would read the
+  // UTC components of a local midnight and walk the date back a day.
+  if (utc.getHours() === 0 && utc.getMinutes() === 0
+      && utc.getSeconds() === 0 && utc.getMilliseconds() === 0) {
+    return utc.getTime();
+  }
+  const year = utc.getUTCFullYear();
+  const local = new Date(year, utc.getUTCMonth(), utc.getUTCDate());
+  // Years below 100 would be remapped into the 1900s by the Date constructor.
+  local.setFullYear(year);
+  return isNaN(local) ? null : local.getTime();
+}
+
 // Bumps the lifetime "tabs opened" counter by one and returns the new total.
 // Called once per dashboard load (each new tab instantiates a fresh App).
 export function incrementTabCount(storage) {
@@ -87,6 +175,8 @@ export class App {
     this.showUpdateTips = true;
     this.mode = 'age'; // 'age' | 'countdown-year' | 'countdown-date'
     this.countdownDate = null; // Date object for countdown-date mode
+    this.countdownHasTime = false; // whether the user set a time of day on it
+    this.dobHasTime = false; // whether the user set a time of birth
     this.counterSize = 'medium'; // 'small' | 'medium' | 'large'
     this.themeMode = 'auto'; // 'auto' | 'light' | 'dark'
     this.lightVariant = 'classic'; // 'classic' | 'warm' | 'mist'
@@ -104,11 +194,7 @@ export class App {
     }
     this.element.addEventListener('submit', this.handleSubmit.bind(this));
 
-    if (this.dob) {
-      this.renderAgeLoop();
-    } else {
-      this.renderChoose();
-    }
+    this.renderCounterOrChoose();
 
     this.setupSettings();
     this.maybeShowWhatsNew();
@@ -164,14 +250,40 @@ export class App {
     const autoHide = setTimeout(dismiss, 5000);
   }
 
-  load() {
-    const storedDob = localStorage.getItem('dob');
-    if (storedDob) {
-      const timestamp = parseInt(storedDob, 10);
-      if (!isNaN(timestamp)) {
-        this.dob = new Date(timestamp);
-      }
+  // True when there is something to count. Countdown modes stand on their own:
+  // requiring a date of birth for them used to trap anyone who only wanted a
+  // countdown behind the "When were you born?" form on every new tab.
+  hasCounter() {
+    if (this.mode === 'countdown-year') return true;
+    if (this.mode === 'countdown-date') return Boolean(this.countdownDate);
+    return Boolean(this.dob);
+  }
+
+  renderCounterOrChoose() {
+    if (this.hasCounter()) {
+      this.renderAgeLoop();
+    } else {
+      this.renderChoose();
     }
+  }
+
+  load() {
+    const stored = parseStoredDate(localStorage.getItem('dob'));
+    if (!stored) return;
+
+    // A missing 'dobHasTime' key means the DOB predates 1.5.0 and is stored at
+    // UTC midnight. Re-anchor it to local midnight once; the key doubles as the
+    // migration marker so this runs exactly once per profile.
+    if (localStorage.getItem('dobHasTime') === null) {
+      const normalized = normalizeLegacyDob(stored.getTime());
+      this.dob = normalized === null ? stored : new Date(normalized);
+      this.dobHasTime = false;
+      this.save();
+      return;
+    }
+
+    this.dob = stored;
+    this.dobHasTime = localStorage.getItem('dobHasTime') === '1';
   }
 
   loadConfig() {
@@ -181,7 +293,8 @@ export class App {
     this.searchEngine = SEARCH_ENGINES[storedEngine] ? storedEngine : DEFAULT_ENGINE;
     this.searchNewTab = localStorage.getItem('searchNewTab') === '1';
     this.showUpdateTips = localStorage.getItem('showUpdateTips') !== '0';
-    this.mode = localStorage.getItem('mode') || 'age';
+    const storedMode = localStorage.getItem('mode');
+    this.mode = ['age', 'countdown-year', 'countdown-date'].includes(storedMode) ? storedMode : 'age';
     const storedSize = localStorage.getItem('counterSize');
     this.counterSize = ['small', 'medium', 'large'].includes(storedSize) ? storedSize : 'medium';
     this.themeMode = localStorage.getItem('themeMode') || 'auto';
@@ -191,10 +304,15 @@ export class App {
     this.applyCounterSize();
     this.applyTheme();
     this.applyFont();
-    const cdTs = localStorage.getItem('countdownDate');
-    if (cdTs) {
-      const d = new Date(parseInt(cdTs, 10));
-      if (!isNaN(d)) this.countdownDate = d;
+    this.countdownDate = parseStoredDate(localStorage.getItem('countdownDate'));
+    this.countdownHasTime = this.countdownDate !== null
+      && localStorage.getItem('countdownHasTime') === '1';
+
+    // Repairs a combination older builds could persist: countdown-date selected
+    // with no target stored, which rendered an age counter under a countdown
+    // mode — or, for someone without a date of birth, no counter at all.
+    if (this.mode === 'countdown-date' && !this.countdownDate) {
+      this.mode = 'age';
     }
   }
 
@@ -212,12 +330,17 @@ export class App {
     localStorage.setItem('font', this.font);
     if (this.countdownDate) {
       localStorage.setItem('countdownDate', this.countdownDate.getTime().toString());
+      localStorage.setItem('countdownHasTime', this.countdownHasTime ? '1' : '0');
+    } else {
+      localStorage.removeItem('countdownDate');
+      localStorage.removeItem('countdownHasTime');
     }
   }
 
   save() {
     if (this.dob) {
       localStorage.setItem('dob', this.dob.getTime().toString());
+      localStorage.setItem('dobHasTime', this.dobHasTime ? '1' : '0');
     }
   }
 
@@ -225,9 +348,14 @@ export class App {
     event.preventDefault();
 
     const input = this.element.querySelector('input[type="date"]');
-    if (!input?.valueAsDate) return;
+    // Parsed from the string rather than read via valueAsDate: the latter
+    // returns UTC midnight, a different instant from the local midnight the
+    // user picked, which skews the age by the timezone offset.
+    const dob = parseLocalDate(input?.value);
+    if (!dob) return;
 
-    this.dob = input.valueAsDate;
+    this.dob = dob;
+    this.dobHasTime = false;
     this.save();
     this.renderAgeLoop();
   }
@@ -236,7 +364,7 @@ export class App {
     this.element.innerHTML = this.getTemplate('dob')();
     const input = this.element.querySelector('input[type="date"]');
     if (input) {
-      input.max = new Date().toISOString().slice(0, 10);
+      input.max = formatLocalDate(new Date());
     }
   }
 
@@ -245,7 +373,7 @@ export class App {
       return `UNTIL DEC 31, ${new Date().getFullYear()}`;
     }
     if (this.mode === 'countdown-date' && this.countdownDate) {
-      return `UNTIL ${this.countdownDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()}`;
+      return formatCountdownLabel(this.countdownDate, this.countdownHasTime);
     }
     return 'AGE';
   }
@@ -275,8 +403,10 @@ export class App {
         result = calculateCountdown(endOfYear());
       } else if (this.mode === 'countdown-date' && this.countdownDate) {
         result = calculateCountdown(this.countdownDate);
-      } else {
+      } else if (this.dob) {
         result = calculateAge(this.dob);
+      } else {
+        result = { yearPart: '0', decimalPart: '000000000' };
       }
       if (this.yearEl) this.yearEl.textContent = result.yearPart;
       if (this.msEl) this.msEl.textContent = result.decimalPart;
@@ -307,7 +437,7 @@ export class App {
   refreshSearch() {
     const existing = this.element.querySelector('.web-search');
     if (existing) existing.remove();
-    if (this.showSearch && this.dob) {
+    if (this.showSearch && this.hasCounter()) {
       const quote = this.element.querySelector('.daily-quote');
       this.renderSearch();
       if (quote) this.element.appendChild(quote);
@@ -389,13 +519,25 @@ export class App {
     const radios = document.querySelectorAll('input[name="mode"]');
     radios.forEach(r => { r.checked = r.value === this.mode; });
 
-    const cdInput2 = document.getElementById('settings-countdown-date');
-    if (cdInput2) cdInput2.hidden = this.mode !== 'countdown-date';
+    this.syncCountdownRow(this.mode);
 
-    const cdInput = document.getElementById('settings-countdown-date');
-    if (cdInput && this.countdownDate) {
-      cdInput.value = formatLocalDate(this.countdownDate);
+    const cdDate = document.getElementById('settings-countdown-date');
+    if (cdDate && this.countdownDate) cdDate.value = formatLocalDate(this.countdownDate);
+    const cdTimeToggle = document.getElementById('settings-countdown-time-toggle');
+    if (cdTimeToggle) cdTimeToggle.checked = this.countdownHasTime;
+    const cdTime = document.getElementById('settings-countdown-time');
+    if (cdTime && this.countdownDate && this.countdownHasTime) {
+      cdTime.value = formatLocalTime(this.countdownDate);
     }
+    this.syncTimeRow('settings-countdown-time-row', this.countdownHasTime);
+
+    const dobTimeToggle = document.getElementById('settings-dob-time-toggle');
+    if (dobTimeToggle) dobTimeToggle.checked = this.dobHasTime;
+    const dobTime = document.getElementById('settings-dob-time');
+    if (dobTime && this.dob && this.dobHasTime) {
+      dobTime.value = formatLocalTime(this.dob);
+    }
+    this.syncTimeRow('settings-dob-time-row', this.dobHasTime);
 
     document.querySelectorAll('[data-theme-mode]').forEach(btn => {
       btn.classList.toggle('size-option--active', btn.dataset.themeMode === this.themeMode);
@@ -414,6 +556,19 @@ export class App {
     if (tabCountEl) tabCountEl.textContent = this.tabsOpened.toLocaleString();
   }
 
+  // The countdown target inputs only make sense while "Until date" is picked.
+  // Driven by the selected radio rather than this.mode, because the radio can
+  // legitimately be ahead of the committed mode while a target is being chosen.
+  syncCountdownRow(selectedMode) {
+    const row = document.getElementById('settings-countdown-options');
+    if (row) row.hidden = selectedMode !== 'countdown-date';
+  }
+
+  syncTimeRow(rowId, visible) {
+    const row = document.getElementById(rowId);
+    if (row) row.hidden = !visible;
+  }
+
   setupSettings() {
     const btn = document.getElementById('settings-btn');
     const overlay = document.getElementById('settings-overlay');
@@ -421,25 +576,34 @@ export class App {
     const doneBtn = document.getElementById('settings-done');
     const saveBtn = document.getElementById('settings-save');
     const dobInput = document.getElementById('settings-dob');
+    const dobTimeInput = document.getElementById('settings-dob-time');
+    const dobTimeToggle = document.getElementById('settings-dob-time-toggle');
     const quoteCheckbox = document.getElementById('settings-quote-toggle');
     const cdInput = document.getElementById('settings-countdown-date');
+    const cdTimeInput = document.getElementById('settings-countdown-time');
+    const cdTimeToggle = document.getElementById('settings-countdown-time-toggle');
     const sizeOptions = document.querySelectorAll('.size-option[data-size]');
 
     if (!btn || !overlay) return;
 
-    // Populate current dob
+    // Populate current dob. Bounds are local calendar days: deriving them from
+    // toISOString() put "today" out of reach in far-eastern timezones.
+    const today = formatLocalDate(new Date());
     if (dobInput && this.dob) {
-      dobInput.value = this.dob.toISOString().slice(0, 10);
+      dobInput.value = formatLocalDate(this.dob);
     }
     if (dobInput) {
-      dobInput.max = new Date().toISOString().slice(0, 10);
+      dobInput.max = today;
     }
     if (cdInput) {
-      cdInput.min = new Date().toISOString().slice(0, 10);
+      cdInput.min = today;
     }
     this.updateSettingsUI();
 
     btn.addEventListener('click', () => {
+      // Re-sync on open so a half-finished selection from last time (e.g. the
+      // "Until date" radio clicked but no target picked) does not linger.
+      this.updateSettingsUI();
       overlay.hidden = false;
     });
 
@@ -451,15 +615,23 @@ export class App {
       if (e.target === overlay) overlay.hidden = true;
     });
 
-    // DOB save
+    // DOB save — date and optional time commit together, on the Save button.
     saveBtn?.addEventListener('click', () => {
-      if (!dobInput?.value) return;
-      const newDob = new Date(dobInput.value);
-      if (isNaN(newDob) || newDob > new Date()) return;
+      const wantsTime = Boolean(dobTimeToggle?.checked && dobTimeInput?.value);
+      const newDob = parseLocalDateTime(dobInput?.value, wantsTime ? dobTimeInput.value : '');
+      if (!newDob || newDob > new Date()) return;
       this.dob = newDob;
+      this.dobHasTime = wantsTime;
       this.save();
       closePanel();
-      this.renderAgeLoop();
+      this.renderCounterOrChoose();
+    });
+
+    dobTimeToggle?.addEventListener('change', () => {
+      this.syncTimeRow('settings-dob-time-row', dobTimeToggle.checked);
+      if (dobTimeToggle.checked && dobTimeInput && !dobTimeInput.value) {
+        dobTimeInput.value = formatLocalTime(this.dob) || '00:00';
+      }
     });
 
     // Search toggle / engine / target
@@ -496,30 +668,42 @@ export class App {
       this.showQuote = quoteCheckbox.checked;
       this.saveConfig();
       const existing = this.element.querySelector('.daily-quote');
-      if (this.showQuote && !existing && this.dob) {
+      if (this.showQuote && !existing && this.hasCounter()) {
         this.renderQuote();
       } else if (!this.showQuote && existing) {
         existing.remove();
       }
     });
 
+    // Reads the countdown target out of its inputs into state. Returns false
+    // when there is nothing usable yet, leaving state untouched.
+    const readCountdownTarget = () => {
+      const wantsTime = Boolean(cdTimeToggle?.checked && cdTimeInput?.value);
+      const target = parseLocalDateTime(cdInput?.value, wantsTime ? cdTimeInput.value : '');
+      if (!target) return false;
+      this.countdownDate = target;
+      this.countdownHasTime = wantsTime;
+      return true;
+    };
+
     // Mode radio buttons
     document.querySelectorAll('input[name="mode"]').forEach(radio => {
       radio.addEventListener('change', () => {
-        this.mode = radio.value;
+        const selected = radio.value;
+        this.syncCountdownRow(selected);
 
-        if (cdInput) cdInput.hidden = this.mode !== 'countdown-date';
-
-        // For countdown-date, require a date before applying
-        if (this.mode === 'countdown-date') {
-          if (!this.countdownDate && !cdInput?.value) return;
-          if (cdInput?.value) {
-            this.countdownDate = parseLocalDate(cdInput.value);
-          }
+        // "Until date" cannot be applied without a target. Nothing is committed
+        // until there is one: assigning this.mode before this check meant the
+        // next saveConfig() persisted a countdown mode with no date behind it.
+        if (selected === 'countdown-date' && !readCountdownTarget()) {
+          cdInput?.focus();
+          try { cdInput?.showPicker?.(); } catch {}
+          return;
         }
 
+        this.mode = selected;
         this.saveConfig();
-        if (this.dob || this.mode !== 'age') this.renderAgeLoop();
+        this.renderCounterOrChoose();
       });
     });
 
@@ -596,13 +780,28 @@ export class App {
       });
     });
 
-    // Countdown date input change
-    cdInput?.addEventListener('change', () => {
-      if (!cdInput.value) return;
-      this.countdownDate = parseLocalDate(cdInput.value);
-      if (!this.countdownDate) return;
+    // Countdown target inputs apply as soon as they hold something valid.
+    // Picking a date is also what promotes the mode when "Until date" was
+    // selected but had nothing to count down to yet.
+    const applyCountdownTarget = () => {
+      if (!readCountdownTarget()) return;
+      const dateRadio = document.querySelector('input[name="mode"][value="countdown-date"]');
+      if (dateRadio?.checked) this.mode = 'countdown-date';
       this.saveConfig();
       if (this.mode === 'countdown-date') this.renderAgeLoop();
+    };
+
+    cdInput?.addEventListener('change', applyCountdownTarget);
+    cdTimeInput?.addEventListener('change', applyCountdownTarget);
+
+    cdTimeToggle?.addEventListener('change', () => {
+      this.syncTimeRow('settings-countdown-time-row', cdTimeToggle.checked);
+      // Seed the field so switching the toggle on shows a concrete value
+      // instead of an empty picker.
+      if (cdTimeToggle.checked && cdTimeInput && !cdTimeInput.value) {
+        cdTimeInput.value = formatLocalTime(this.countdownDate) || '00:00';
+      }
+      applyCountdownTarget();
     });
   }
 

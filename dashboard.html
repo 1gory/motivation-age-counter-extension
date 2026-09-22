@@ -88,8 +88,23 @@
           <label class="settings-mode-option">
             <input type="radio" name="mode" value="countdown-date">
             <span>Until date</span>
-            <input type="date" id="settings-countdown-date" class="settings-date settings-date--inline" hidden>
           </label>
+        </div>
+
+        <div class="settings-subsection" id="settings-countdown-options" hidden>
+          <div class="settings-row">
+            <input type="date" id="settings-countdown-date" class="settings-date"
+                   aria-label="Countdown target date">
+          </div>
+          <label class="settings-toggle-row">
+            <span>Set time</span>
+            <input type="checkbox" id="settings-countdown-time-toggle" class="settings-checkbox">
+            <span class="settings-toggle-track"><span class="settings-toggle-thumb"></span></span>
+          </label>
+          <div class="settings-row settings-time-row" id="settings-countdown-time-row" hidden>
+            <input type="time" id="settings-countdown-time" class="settings-date"
+                   aria-label="Countdown target time">
+          </div>
         </div>
       </section>
 
@@ -98,6 +113,15 @@
         <div class="settings-row">
           <input type="date" id="settings-dob" class="settings-date">
           <button type="button" class="settings-save" id="settings-save">Save</button>
+        </div>
+        <label class="settings-toggle-row">
+          <span>Set time</span>
+          <input type="checkbox" id="settings-dob-time-toggle" class="settings-checkbox">
+          <span class="settings-toggle-track"><span class="settings-toggle-thumb"></span></span>
+        </label>
+        <div class="settings-row settings-time-row" id="settings-dob-time-row" hidden>
+          <input type="time" id="settings-dob-time" class="settings-date"
+                 aria-label="Time of birth">
         </div>
       </section>
 

@@ -55,17 +55,21 @@ function seededShuffle(arr, seed) {
  * Within a given calendar year, every day produces a distinct quote.
  * Different years use different shuffles.
  *
+ * The day is the user's LOCAL calendar day. Deriving it from toISOString()
+ * instead pinned the rotation to UTC midnight, so the "quote of the day"
+ * changed at 03:00 for a reader in UTC+3 and mid-afternoon in UTC-8.
+ *
  * @param {Array<{text: string, author: string, year?: number}>} quotes
  * @param {Date} [date]
  * @returns {{text: string, author: string, year?: number}}
  */
 export function getQuoteOfTheDay(quotes, date = new Date()) {
-  const iso = date.toISOString().slice(0, 10); // "YYYY-MM-DD"
-  const year = parseInt(iso.slice(0, 4), 10);
-  const month = parseInt(iso.slice(5, 7), 10) - 1;
-  const day = parseInt(iso.slice(8, 10), 10);
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
 
-  // Day-of-year index (UTC, 0-based)
+  // Day-of-year index (0-based). Date.UTC is used purely as a calendar-aware
+  // day counter here — both operands are local components, so no zone shift.
   const yearStartMs = Date.UTC(year, 0, 1);
   const todayMs = Date.UTC(year, month, day);
   const dayOfYear = Math.floor((todayMs - yearStartMs) / 86400000);

@@ -7,6 +7,10 @@ export const WHATS_NEW = {
     title: "What's new",
     body: "See how many new tabs you've opened with the extension — check the count in Settings.",
   },
+  '1.5.0': {
+    title: "What's new",
+    body: 'Countdowns can now target a time of day, not just a date. Turn on "Set time" in Settings.',
+  },
 };
 
 export function getWhatsNew(currentVersion, seenVersion, map = WHATS_NEW) {

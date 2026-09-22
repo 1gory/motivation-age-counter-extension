@@ -19,7 +19,9 @@ This extension replaces your new tab page with a real-time counter designed to k
 Choose from three display modes:
 - Age counter — see exactly how long you have been alive, updated in real time with millisecond precision
 - Until end of year — a countdown to December 31, showing how much of the year remains
-- Until date — a countdown to any date you choose
+- Until date — a countdown to any date you choose, and optionally to a specific time of day, so a deadline at 6:30 PM counts down to 6:30 PM rather than to midnight
+
+Both the countdown target and your date of birth accept an optional time. Leave it off and everything behaves as before; switch on "Set time" when the hour matters.
 
 Every new tab also shows a daily quote from a curated collection of over 1500 quotes. A new quote appears each day and stays consistent throughout the day. The quote feature can be turned off in settings.
 
@@ -34,7 +36,7 @@ Make it yours:
 - Three counter sizes — small, medium, or large
 
 All settings are accessible via the gear icon in the bottom-right corner, organized into two tabs:
-- Counter — display mode, target date, date of birth, daily quote, search bar with engine selection, update tips
+- Counter — display mode, target date and optional time, date of birth and optional time of birth, daily quote, search bar with engine selection, update tips
 - Appearance — counter size, theme, font
 
 The settings panel also shows a small running tally of how many new tabs you have opened with the extension — a quiet nudge that the time really is adding up.
@@ -85,8 +87,8 @@ Chrome Web Store allows up to 5 screenshots. Required size: **1280×800** (or 64
 |---|---|---|
 | 1 | Counter — age mode, light | Default state, no quote |
 | 2 | Counter — age mode, dark | Dark mode, with daily quote |
-| 3 | Counter — countdown to date | "Until date" mode with a target date |
-| 4 | Settings panel open | Search bar + engine selector + Update tips in Counter tab; "Tabs opened" tally visible in the footer |
+| 3 | Counter — countdown to date | "Until date" mode with a target date and a time of day in the label |
+| 4 | Settings panel open | "Set time" toggles for the countdown target and date of birth; search bar + engine selector + Update tips in Counter tab; "Tabs opened" tally visible in the footer |
 | 5 | Counter — countdown to year end | "Until end of year" mode |
 
 **Tip:** Screenshots 1 and 2 are the most important — they show the core experience. Settings screenshot (4) helps users understand the features before installing. You do not need to screenshot every state of the menu.
