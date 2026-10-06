@@ -187,8 +187,6 @@ unzip -l motivation-counter-v${VERSION}.zip
 - [ ] Replace **every** stale screenshot in the listing (not only the one
       you obviously changed — re-audit per step 5).
 - [ ] Update the description text if `STORE_LISTING.md` changed.
-- [ ] Fill the **What's new in this version** field (CWS shows it on the
-      listing). Use 1–3 sentences from the GitHub release notes.
 - [ ] Confirm Privacy practices if CWS asks (same answers as last time
       unless permissions changed).
 - [ ] Hit **Submit for review**.
@@ -246,7 +244,9 @@ add to it after each release.
   theme / font / size customisation shipped in 1.3.0. Lesson: step 6c now
   audits `docs/` against `STORE_LISTING.md` every release.
 - **1.3.0** — The CWS "What's new in this version" field was not filled.
-  Lesson: step 10 calls it out.
+  **Withdrawn in 1.6.0:** the developer dashboard has no such field, so the
+  step that asked for it was removed. Users see what changed through the
+  in-app release notes (`app/changelog.js`) and GitHub Releases.
 - **1.5.0** — The ZIP was uploaded to the Chrome Web Store while the code was
   still uncommitted: no commit, no `v1.5.0` tag, nothing pushed. For a while
   the published artifact matched no point in the history. It was caught only
@@ -266,6 +266,12 @@ add to it after each release.
   github.io pages and at a badge image inside `docs/`. Lesson: when a hosted
   artifact moves, switch off what built it (Settings → Pages) and grep the
   repo for the old URL in the same change. Step 6c now covers ipershin.me.
+
+- **1.6.0** — Screenshots 3 and 4 were refreshed in the repo but not uploaded
+  to the listing (no time on release day), so the store still shows the old
+  settings panel with a Save button and without the version number.
+  Lesson: next release, upload `images/screenshots/screenshot_1280x800_3.jpg`
+  and `_4.jpg` before anything else in step 10.
 
 ## When in doubt: ask Claude
 
