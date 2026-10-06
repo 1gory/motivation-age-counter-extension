@@ -36,10 +36,10 @@ Make it yours:
 - Three counter sizes — small, medium, or large
 
 All settings are accessible via the gear icon in the bottom-right corner, organized into two tabs:
-- Counter — display mode, target date and optional time, date of birth and optional time of birth, daily quote, search bar with engine selection, update tips
+- Counter — display mode, with your date of birth (and optional time of birth) under Age counter and the target date (and optional time) under Until date; daily quote, search bar with engine selection, update tips
 - Appearance — counter size, theme, font
 
-The settings panel also shows a small running tally of how many new tabs you have opened with the extension — a quiet nudge that the time really is adding up.
+The settings panel also shows a small running tally of how many new tabs you have opened with the extension — a quiet nudge that the time really is adding up. Click the version number next to it to see what changed in recent releases.
 
 After each meaningful update, a small dismissible tip appears next to the gear icon so you know what is new. You can turn these tips off in settings.
 
@@ -88,10 +88,10 @@ Chrome Web Store allows up to 5 screenshots. Required size: **1280×800** (or 64
 | 1 | Counter — age mode, dark | Classic dark palette, with daily quote |
 | 2 | Counter — countdown to year end, light | "Until end of year" mode, Classic light palette |
 | 3 | Settings panel — Appearance tab | Size, theme, light/dark palettes, font; "Tabs opened" tally in the footer |
-| 4 | Settings panel — Counter tab | "Until date" with "Set time" on, date of birth with its own "Set time" toggle and Save |
+| 4 | Settings panel — Counter tab | "Until date" with its target date and "Set time" on; search bar with engine selector; version number in the footer |
 | 5 | Counter — age mode, Warm Paper palette | Light warm palette, with daily quote |
 
-Slots 3 and 4 were last refreshed in 1.5.1 by compositing a 1280×700 render
+Slots 3 and 4 were last refreshed in 1.6.0 by compositing a 1280×700 render
 of `dashboard.html` between the browser toolbar and footer bands of the
 previous shots, so the set keeps a consistent look.
 
@@ -108,6 +108,7 @@ zip -r motivation-counter-v$(cat manifest.json | grep '"version"' | head -1 | se
   manifest.json \
   dashboard.html \
   app/app.js \
+  app/changelog.js \
   app/daily-quote.js \
   app/quotes.js \
   app/search-engines.js \
@@ -123,6 +124,7 @@ zip -r motivation-counter-v$(cat manifest.json | grep '"version"' | head -1 | se
 | `manifest.json` | Extension config |
 | `dashboard.html` | New tab UI |
 | `app/app.js` | Application logic |
+| `app/changelog.js` | Release notes shown from the version number in Settings |
 | `app/daily-quote.js` | Daily quote selection logic |
 | `app/quotes.js` | Curated quote collection (1554 quotes) |
 | `css/style.css` | Styles |

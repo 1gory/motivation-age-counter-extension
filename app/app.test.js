@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { calculateAge, calculateCountdown, endOfYear, incrementTabCount, TemplateEngine, MILLISECONDS_PER_YEAR, parseLocalDate, formatLocalDate, parseLocalTime, parseLocalDateTime, formatLocalTime, formatCountdownLabel, normalizeLegacyDob, parseStoredDate, dobError } from './app.js';
 import { hashDay, getQuoteOfTheDay } from './daily-quote.js';
 import { SEARCH_ENGINES, DEFAULT_ENGINE, buildSearchUrl } from './search-engines.js';
-import { getWhatsNew, isFirstInstall } from './whats-new.js';
+import { getWhatsNew, isFirstInstall, WHATS_NEW } from './whats-new.js';
+import { CHANGELOG, RELEASES_URL, recentReleases } from './changelog.js';
+import { readFileSync } from 'node:fs';
 
 describe('MILLISECONDS_PER_YEAR', () => {
   it('equals 365.2425 days in milliseconds (Gregorian year)', () => {
@@ -345,6 +347,18 @@ describe('dobError', () => {
   it('rejects a time later today', () => {
     expect(dobError(new Date(2026, 9, 6, 18, 0), now)).toMatch(/future/i);
   });
+
+  it('rejects the years a date passes through while it is being typed', () => {
+    for (const year of [1, 19, 199]) {
+      const partial = new Date(2000, 4, 15);
+      partial.setFullYear(year);
+      expect(dobError(partial, now)).toMatch(/1900/);
+    }
+  });
+
+  it('accepts 1900 itself', () => {
+    expect(dobError(new Date(1900, 0, 1), now)).toBeNull();
+  });
 });
 
 describe('parseStoredDate', () => {
@@ -606,5 +620,69 @@ describe('getWhatsNew', () => {
 
   it('returns null when no current version is provided', () => {
     expect(getWhatsNew(null, '1.2.0', map)).toBeNull();
+  });
+});
+
+describe('CHANGELOG', () => {
+  const manifest = JSON.parse(readFileSync(new URL('../manifest.json', import.meta.url), 'utf8'));
+  const toNumbers = (v) => v.split('.').map(Number);
+  const isNewer = (a, b) => {
+    const [x, y] = [toNumbers(a), toNumbers(b)];
+    for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i];
+    return false;
+  };
+
+  it('starts with the version in manifest.json, so no release ships without notes', () => {
+    expect(CHANGELOG[0].version).toBe(manifest.version);
+  });
+
+  it('is ordered newest first with no duplicates', () => {
+    for (let i = 1; i < CHANGELOG.length; i++) {
+      expect(isNewer(CHANGELOG[i - 1].version, CHANGELOG[i].version)).toBe(true);
+    }
+  });
+
+  it('gives every entry a valid date that never goes forward in time', () => {
+    for (let i = 0; i < CHANGELOG.length; i++) {
+      expect(CHANGELOG[i].date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(parseLocalDate(CHANGELOG[i].date)).not.toBeNull();
+      if (i > 0) expect(CHANGELOG[i].date <= CHANGELOG[i - 1].date).toBe(true);
+    }
+  });
+
+  it('gives every entry at least one short note', () => {
+    for (const { notes } of CHANGELOG) {
+      expect(notes.length).toBeGreaterThan(0);
+      for (const note of notes) expect(note.length).toBeLessThanOrEqual(90);
+    }
+  });
+
+  it('links to the GitHub releases page', () => {
+    expect(RELEASES_URL).toBe('https://github.com/1gory/motivation-age-counter-extension/releases');
+  });
+});
+
+describe('recentReleases', () => {
+  it('returns the ten newest releases by default', () => {
+    const list = recentReleases();
+    expect(list).toHaveLength(Math.min(10, CHANGELOG.length));
+    expect(list[0]).toBe(CHANGELOG[0]);
+  });
+
+  it('honours a smaller count', () => {
+    expect(recentReleases(3).map(r => r.version)).toEqual(CHANGELOG.slice(0, 3).map(r => r.version));
+  });
+
+  it('returns everything when there are fewer entries than asked for', () => {
+    const short = [{ version: '1.0.0', date: '2026-01-01', notes: ['x'] }];
+    expect(recentReleases(10, short)).toEqual(short);
+  });
+});
+
+describe('WHATS_NEW', () => {
+  it('keeps every tooltip body within the 130-character bubble', () => {
+    for (const { body } of Object.values(WHATS_NEW)) {
+      expect(body.length).toBeLessThanOrEqual(130);
+    }
   });
 });

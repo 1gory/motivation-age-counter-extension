@@ -11,6 +11,10 @@ export const WHATS_NEW = {
     title: "What's new",
     body: 'Countdowns can now target a time of day, not just a date. Turn on "Set time" in Settings.',
   },
+  '1.6.0': {
+    title: "What's new",
+    body: 'See what changed in each release: click the version number at the bottom of Settings.',
+  },
 };
 
 export function getWhatsNew(currentVersion, seenVersion, map = WHATS_NEW) {

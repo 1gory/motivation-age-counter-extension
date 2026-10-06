@@ -2,6 +2,7 @@ import { getQuoteOfTheDay } from './daily-quote.js';
 import { QUOTES } from './quotes.js';
 import { SEARCH_ENGINES, DEFAULT_ENGINE, buildSearchUrl } from './search-engines.js';
 import { getWhatsNew, isFirstInstall } from './whats-new.js';
+import { RELEASES_URL, recentReleases } from './changelog.js';
 
 export const MILLISECONDS_PER_YEAR = 365.2425 * 24 * 60 * 60 * 1000; // Gregorian year
 
@@ -122,12 +123,13 @@ export function parseStoredDate(raw) {
   return isNaN(date) ? null : date;
 }
 
-// Explains why a date of birth cannot be saved, or returns null if it can.
-// The Save button used to bail out silently on a bad value, which read as a
-// button that does nothing.
+// Explains why a date of birth cannot be applied, or returns null if it can.
+// Bad values used to be dropped silently, which read as a broken setting.
 export function dobError(dob, now = new Date()) {
-  if (!(dob instanceof Date) || isNaN(dob)) return 'Pick your date of birth first.';
+  if (!(dob instanceof Date) || isNaN(dob)) return 'Enter a complete date of birth.';
   if (dob > now) return "Date of birth can't be in the future.";
+  // Also what a year reads as halfway through typing it: 0001, 0019, 0199.
+  if (dob.getFullYear() < 1900) return 'Enter a year from 1900 on.';
   return null;
 }
 
@@ -528,7 +530,7 @@ export class App {
     const radios = document.querySelectorAll('input[name="mode"]');
     radios.forEach(r => { r.checked = r.value === this.mode; });
 
-    this.syncCountdownRow(this.mode);
+    this.syncModeOptions(this.mode);
 
     const cdDate = document.getElementById('settings-countdown-date');
     if (cdDate && this.countdownDate) cdDate.value = formatLocalDate(this.countdownDate);
@@ -561,16 +563,27 @@ export class App {
       btn.classList.toggle('font-option--active', btn.dataset.font === this.font);
     });
 
+    const versionEl = document.getElementById('settings-version');
+    if (versionEl) {
+      // Absent outside the extension (tests, a plain local server).
+      const version = this.getExtensionVersion();
+      versionEl.textContent = version ? `v${version}` : '';
+      versionEl.hidden = !version;
+    }
+
     const tabCountEl = document.getElementById('settings-tabcount-value');
     if (tabCountEl) tabCountEl.textContent = this.tabsOpened.toLocaleString();
   }
 
-  // The countdown target inputs only make sense while "Until date" is picked.
+  // Each mode's inputs sit under its radio and show only while it is picked:
+  // the date of birth under "Age counter", the target under "Until date".
   // Driven by the selected radio rather than this.mode, because the radio can
-  // legitimately be ahead of the committed mode while a target is being chosen.
-  syncCountdownRow(selectedMode) {
-    const row = document.getElementById('settings-countdown-options');
-    if (row) row.hidden = selectedMode !== 'countdown-date';
+  // legitimately be ahead of the committed mode while a date is being chosen.
+  syncModeOptions(selectedMode) {
+    const age = document.getElementById('settings-age-options');
+    if (age) age.hidden = selectedMode !== 'age';
+    const countdown = document.getElementById('settings-countdown-options');
+    if (countdown) countdown.hidden = selectedMode !== 'countdown-date';
   }
 
   syncTimeRow(rowId, visible) {
@@ -583,7 +596,6 @@ export class App {
     const overlay = document.getElementById('settings-overlay');
     const closeBtn = document.getElementById('settings-close');
     const doneBtn = document.getElementById('settings-done');
-    const saveBtn = document.getElementById('settings-save');
     const dobInput = document.getElementById('settings-dob');
     const dobTimeInput = document.getElementById('settings-dob-time');
     const dobTimeToggle = document.getElementById('settings-dob-time-toggle');
@@ -593,6 +605,13 @@ export class App {
     const cdTimeInput = document.getElementById('settings-countdown-time');
     const cdTimeToggle = document.getElementById('settings-countdown-time-toggle');
     const sizeOptions = document.querySelectorAll('.size-option[data-size]');
+    const tabsEl = document.querySelector('.settings-tabs');
+    const tabPanelsEl = document.querySelector('.settings-tab-panels');
+    const changelogEl = document.getElementById('settings-changelog');
+    const changelogList = document.getElementById('settings-changelog-list');
+    const changelogBack = document.getElementById('settings-changelog-back');
+    const changelogMore = document.getElementById('settings-changelog-more');
+    const versionBtn = document.getElementById('settings-version');
 
     if (!btn || !overlay) return;
 
@@ -619,7 +638,61 @@ export class App {
       else dobInput?.removeAttribute('aria-invalid');
     };
 
+    // Release notes replace the tabs inside the panel rather than stacking a
+    // second dialog on top; the footer, with Done, stays where it is.
+    const renderChangelog = () => {
+      if (!changelogList || changelogList.childElementCount) return;
+      for (const { version, date, notes } of recentReleases()) {
+        const item = document.createElement('li');
+        item.className = 'settings-changelog-item';
+        const head = document.createElement('div');
+        head.className = 'settings-changelog-head';
+        const name = document.createElement('span');
+        name.className = 'settings-changelog-version';
+        name.textContent = `v${version}`;
+        const when = document.createElement('time');
+        when.dateTime = date;
+        when.textContent = parseLocalDate(date)
+          ?.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) ?? date;
+        head.append(name, when);
+        const list = document.createElement('ul');
+        for (const note of notes) {
+          const line = document.createElement('li');
+          line.textContent = note;
+          list.append(line);
+        }
+        item.append(head, list);
+        changelogList.append(item);
+      }
+    };
+    if (changelogMore) changelogMore.href = RELEASES_URL;
+
+    const isChangelogOpen = () => Boolean(changelogEl && !changelogEl.hidden);
+    const showChangelog = (open) => {
+      if (!changelogEl) return;
+      if (open) renderChangelog();
+      // Hold the panel at its current height so it does not jump; the list
+      // scrolls inside it instead.
+      const panel = changelogEl.closest('.settings-panel');
+      if (panel && open && !isChangelogOpen()) panel.style.height = `${panel.offsetHeight}px`;
+      if (panel && !open) panel.style.height = '';
+      changelogEl.hidden = !open;
+      if (tabsEl) tabsEl.hidden = open;
+      if (tabPanelsEl) tabPanelsEl.hidden = open;
+      versionBtn?.setAttribute('aria-expanded', String(open));
+      if (open) {
+        if (changelogList) changelogList.scrollTop = 0;
+        changelogBack?.focus();
+      }
+    };
+    versionBtn?.addEventListener('click', () => showChangelog(!isChangelogOpen()));
+    changelogBack?.addEventListener('click', () => {
+      showChangelog(false);
+      versionBtn?.focus();
+    });
+
     btn.addEventListener('click', () => {
+      showChangelog(false);
       // Re-sync on open so a half-finished selection from last time (e.g. the
       // "Until date" radio clicked but no target picked) does not linger.
       this.updateSettingsUI();
@@ -633,44 +706,93 @@ export class App {
       overlay.hidden = false;
     });
 
-    const closePanel = () => { overlay.hidden = true; };
+    const ageRadio = document.querySelector('input[name="mode"][value="age"]');
+
+    // Reads the date-of-birth fields. Returns null for an untouched empty
+    // field (nothing to apply), otherwise { dob, hasTime, error }.
+    const readDob = () => {
+      if (!dobInput) return null;
+      // A half-typed date also reads as '' but sets badInput.
+      if (dobInput.value === '' && !dobInput.validity?.badInput) return null;
+      const hasTime = Boolean(dobTimeToggle?.checked && dobTimeInput?.value);
+      const dob = parseLocalDateTime(dobInput.value, hasTime ? dobTimeInput.value : '');
+      return { dob, hasTime, error: dobError(dob) };
+    };
+
+    // The date of birth applies as soon as its fields hold a usable value,
+    // just like the countdown target. Holding it back for a Save button, and
+    // then for Done, left it out of step with the rest of the panel: any other
+    // change re-rendered from saved state and flipped its "Set time" switch.
+    // Errors are reported only on request (when the field loses focus), since
+    // a year passes through 0001, 0019 and 0199 while it is being typed.
+    const applyDob = ({ report = false } = {}) => {
+      const read = readDob();
+      if (!read) {
+        setDobError(null);
+        return;
+      }
+      if (read.error) {
+        if (report) setDobError(read.error);
+        return;
+      }
+      setDobError(null);
+      const promote = Boolean(ageRadio?.checked) && this.mode !== 'age';
+      const same = this.dob?.getTime() === read.dob.getTime() && this.dobHasTime === read.hasTime;
+      if (same && !promote) return;
+      this.dob = read.dob;
+      this.dobHasTime = read.hasTime;
+      this.save();
+      // Entering a date is also what promotes the mode when "Age counter" was
+      // picked with no date of birth behind it yet.
+      if (promote) {
+        this.mode = 'age';
+        this.saveConfig();
+      }
+      this.renderCounterOrChoose();
+    };
+
+    const closePanel = () => {
+      // Do not close over a date of birth that cannot be applied: it would be
+      // dropped without a word. Bring the message into view instead.
+      const read = ageRadio?.checked ? readDob() : null;
+      if (read?.error) {
+        showChangelog(false);
+        setActiveTab('counter');
+        setDobError(read.error);
+        dobInput?.focus();
+        return;
+      }
+      overlay.hidden = true;
+    };
     closeBtn?.addEventListener('click', closePanel);
     doneBtn?.addEventListener('click', closePanel);
 
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) overlay.hidden = true;
+      if (e.target === overlay) closePanel();
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !overlay.hidden) closePanel();
-    });
-
-    // DOB save — date and optional time commit together, on the Save button.
-    saveBtn?.addEventListener('click', () => {
-      const wantsTime = Boolean(dobTimeToggle?.checked && dobTimeInput?.value);
-      const newDob = parseLocalDateTime(dobInput?.value, wantsTime ? dobTimeInput.value : '');
-      const error = dobError(newDob);
-      if (error) {
-        setDobError(error);
-        dobInput?.focus();
+      if (e.key !== 'Escape' || overlay.hidden) return;
+      // From the release notes, Escape steps back to the settings first.
+      if (isChangelogOpen()) {
+        showChangelog(false);
+        versionBtn?.focus();
         return;
       }
-      setDobError(null);
-      this.dob = newDob;
-      this.dobHasTime = wantsTime;
-      this.save();
       closePanel();
-      this.renderCounterOrChoose();
     });
 
     dobInput?.addEventListener('input', () => setDobError(null));
-    dobTimeInput?.addEventListener('input', () => setDobError(null));
+    dobInput?.addEventListener('change', () => applyDob());
+    dobInput?.addEventListener('blur', () => applyDob({ report: true }));
+    dobTimeInput?.addEventListener('change', () => applyDob());
 
     dobTimeToggle?.addEventListener('change', () => {
       this.syncTimeRow('settings-dob-time-row', dobTimeToggle.checked);
       if (dobTimeToggle.checked && dobTimeInput && !dobTimeInput.value) {
         dobTimeInput.value = formatLocalTime(this.dob) || '00:00';
       }
+      applyDob();
     });
 
     // Search toggle / engine / target
@@ -717,6 +839,9 @@ export class App {
     // Reads the countdown target out of its inputs into state. Returns false
     // when there is nothing usable yet, leaving state untouched.
     const readCountdownTarget = () => {
+      // The field's min is today, which also rules out the years a date
+      // passes through while it is being typed (0002, 0020, 0202).
+      if (cdInput && !cdInput.checkValidity()) return false;
       const wantsTime = Boolean(cdTimeToggle?.checked && cdTimeInput?.value);
       const target = parseLocalDateTime(cdInput?.value, wantsTime ? cdTimeInput.value : '');
       if (!target) return false;
@@ -729,7 +854,19 @@ export class App {
     document.querySelectorAll('input[name="mode"]').forEach(radio => {
       radio.addEventListener('change', () => {
         const selected = radio.value;
-        this.syncCountdownRow(selected);
+        this.syncModeOptions(selected);
+
+        // Likewise "Age counter" without a date of birth: the date field is
+        // right under the radio, so open it instead of showing the main-page
+        // "When were you born?" form behind the panel.
+        if (selected === 'age' && !this.dob) {
+          applyDob();
+          if (!this.dob) {
+            dobInput?.focus();
+            try { dobInput?.showPicker?.(); } catch {}
+          }
+          return;
+        }
 
         // "Until date" cannot be applied without a target. Nothing is committed
         // until there is one: assigning this.mode before this check meant the

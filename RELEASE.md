@@ -60,7 +60,12 @@ init script that stubs `chrome.runtime.getManifest`. That origin has its own
 - [ ] Bump `package.json` → `"version"` to the **same** value
 - [ ] Run `npm install` if package.json changed (refreshes package-lock.json)
 
-### 3. What's new tooltip
+### 3. Release notes and What's new tooltip
+- [ ] **Every release, patches included:** add an entry at the top of
+      `CHANGELOG` in `app/changelog.js` (version, date, 1–3 short user-facing
+      notes, each ≤ 90 chars). Users see the newest ten when they click the
+      version number in Settings. `npm test` fails if the first entry does not
+      match `manifest.json`.
 - [ ] If MINOR or MAJOR → add an entry in `app/whats-new.js` keyed by the new
       version with `{ title, body }`:
   ```js
@@ -125,22 +130,18 @@ sips -s format jpeg -s formatOptions 85 /tmp/c.png --out "$DST"
 - [ ] If the release closes any other tasks documents in `ai-tasks/`,
       archive or delete them.
 
-### 6c. GitHub Pages (docs/)
-The project ships a landing page from the `docs/` folder on `main`
-(GitHub Pages → Settings → Pages → source: `main` / `/docs`). It is easy to
-forget because it lives outside the extension code and nothing breaks if it
-goes stale.
+### 6c. Landing page (ipershin.me)
+The landing and privacy pages live on ipershin.me, outside this repo:
+`https://ipershin.me/motivation-counter/` and
+`https://ipershin.me/motivation-counter/privacy/`. Nothing here breaks when
+they go stale, which is exactly why they drift.
 
-- [ ] Open `docs/index.html`. Audit the **feature cards** and the **tagline**
-      against the current `STORE_LISTING.md` — every user-visible feature this
-      release touched (search bar, themes, fonts, sizes, new counter modes…)
-      must be reflected. This is the same drift trap as the README.
-- [ ] Update `docs/icon128.png` if the icon changed.
+- [ ] Open the landing page. Audit its feature list and tagline against the
+      current `STORE_LISTING.md` — every user-visible feature this release
+      touched must be reflected. Same drift trap as the README.
+- [ ] If the privacy policy text changed, update the privacy page too.
 - [ ] If the Chrome Web Store listing URL or slug changed, fix the CWS links
-      in both `docs/index.html` and `docs/privacy-policy.html`.
-- [ ] If the privacy policy text changed, mirror it in `docs/privacy-policy.html`.
-- [ ] After push, open `https://1gory.github.io/motivation-age-counter-extension/`
-      and confirm the page reflects this release.
+      on both pages and in `README.md`.
 
 ### 7. Tests
 - [ ] If new logic was added (URL builder, version comparator, etc.), add
@@ -162,6 +163,7 @@ zip -r motivation-counter-v${VERSION}.zip \
   manifest.json \
   dashboard.html \
   app/app.js \
+  app/changelog.js \
   app/daily-quote.js \
   app/quotes.js \
   app/search-engines.js \
@@ -257,9 +259,13 @@ add to it after each release.
   accident — but it still has to be paid off. Lesson: refresh slots 3 and 4
   next release, before adding anything new to step 5's backlog.
   **Paid off in 1.5.1:** both slots re-shot from the current panel.
-- **1.5.0** — `docs/` no longer exists (removed in `3a94f25`), so step 6c is
-  permanently n/a until GitHub Pages is restored. Left in place rather than
-  deleted: if the landing page ever comes back, the trap comes back with it.
+- **1.5.0 → 1.5.1** — `docs/` was removed in `3a94f25` when the landing moved
+  to ipershin.me, but GitHub Pages was left switched on with `main` / `/docs`
+  as its source. Every push to `main` from then on failed the
+  "pages build and deployment" run, and the README kept pointing at the dead
+  github.io pages and at a badge image inside `docs/`. Lesson: when a hosted
+  artifact moves, switch off what built it (Settings → Pages) and grep the
+  repo for the old URL in the same change. Step 6c now covers ipershin.me.
 
 ## When in doubt: ask Claude
 

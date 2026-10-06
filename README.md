@@ -2,9 +2,9 @@
 
 A modernized version of Alex MacCaw's iconic "Motivation" Chrome extension, updated for current browser standards and expanded with new counter modes.
 
-[<img src="https://raw.githubusercontent.com/1gory/motivation-age-counter-extension/main/docs/chrome-webstore-badge.png" alt="Available in the Chrome Web Store" height="58">](https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl)
+[<img src="images/chrome-webstore-badge.png" alt="Available in the Chrome Web Store" height="58">](https://chromewebstore.google.com/detail/motivation-counter/jgebglhbeenjoehfkglemcfaimddnggl)
 
-**[Website](https://1gory.github.io/motivation-age-counter-extension/)** &nbsp;·&nbsp; **[Privacy Policy](https://1gory.github.io/motivation-age-counter-extension/privacy-policy.html)**
+**[Website](https://ipershin.me/motivation-counter/)** &nbsp;·&nbsp; **[Privacy Policy](https://ipershin.me/motivation-counter/privacy/)**
 
 <img src="images/screenshots/screenshot_1280x800_1.jpg" width="480" alt="Extension Preview">
 <img src="images/screenshots/screenshot_1280x800_2.jpg" width="480" alt="Extension Preview">
@@ -36,14 +36,14 @@ All credit for the original concept, design, and implementation belongs to Alex 
 
 Click the ⚙ icon in the bottom-right corner to:
 - Switch display mode
-- Set a target date for countdown, and optionally a time of day
-- Change your date of birth, and optionally your time of birth
+- Set your date of birth under Age counter, and optionally your time of birth
+- Set a target date under Until date, and optionally a time of day
 - Toggle the daily quote
 - Enable the web search bar and pick a search engine
 - Choose a theme, color palette, font, and counter size (S / M / L)
 - Toggle update tips
 
-The footer of the settings panel also shows how many new tabs you have opened with the extension.
+The footer of the settings panel also shows how many new tabs you have opened with the extension, and the version number — click it for short notes on the last ten releases, with a link to the full [release history](https://github.com/1gory/motivation-age-counter-extension/releases).
 
 ## Privacy & Technical Details
 
