@@ -1,6 +1,8 @@
 /* ------- Theme tokens ------- */
 :root {
   --font-family: 'Helvetica Neue', 'Avenir', helvetica, arial, sans-serif;
+  /* Shared by every palette: reads on both the light and the dark panels. */
+  --danger: #E5484D;
 
   /* Defaults (overridden per theme below) */
   --bg: #FFFFFF;
@@ -485,6 +487,8 @@ footer {
 
 .settings-panel {
   position: relative;
+  display: flex;
+  flex-direction: column;
   background: var(--panel-bg);
   color: var(--fg);
   border-radius: 12px;
@@ -492,12 +496,31 @@ footer {
   min-width: 320px;
   max-width: 360px;
   max-height: 100%;
-  overflow-y: auto;
+  box-sizing: border-box;
+  overflow: hidden;
   box-shadow: var(--panel-shadow);
 }
 
+/* Only the tab content scrolls. When the whole panel scrolled, the Done
+   button sat below the fold on an ordinary laptop screen and the close
+   button scrolled away with the title. */
+.settings-title,
+.settings-tabs,
+.settings-footer {
+  flex-shrink: 0;
+}
+
+/* The global button reset removes outlines; keyboard users still need to
+   see where focus is. */
+.settings-panel button:focus-visible,
+.settings-panel select:focus-visible,
+.settings-panel a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .settings-title {
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.25rem;
   font-size: 1rem;
   font-weight: 600;
   color: var(--fg);
@@ -536,6 +559,9 @@ footer {
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 500;
+  /* Fixed line box, shared with .font-option, so every segmented row is the
+     same height whatever font the label is set in. */
+  line-height: 1.25rem;
   padding: 0.4rem 0;
   border: 1.5px solid var(--size-border);
   border-radius: 6px;
@@ -647,9 +673,17 @@ footer {
 }
 
 /* Stack panels in one grid cell so the panel takes the height of the
-   tallest tab — switching tabs never resizes the dialog. */
+   tallest tab — switching tabs never resizes the dialog. This is also the
+   scroll box; the negative margin keeps focus rings and the active swatch
+   ring from being clipped at its edges. */
 .settings-tab-panels {
   display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 -0.5rem;
+  padding: 0.25rem 0.5rem 0;
 }
 
 .settings-tab-panel {
@@ -673,7 +707,8 @@ footer {
   flex: 1;
   font-size: 0.95rem;
   font-weight: 500;
-  padding: 0.45rem 0;
+  line-height: 1.25rem;
+  padding: 0.4rem 0;
   border: 1.5px solid var(--size-border);
   border-radius: 6px;
   background: none;
@@ -796,6 +831,11 @@ footer {
   color: var(--fg);
 }
 
+/* A "Set time" switch directly under its date field */
+.settings-row + .settings-toggle-row {
+  margin-top: 0.5rem;
+}
+
 /* Countdown target date/time, revealed under the "Until date" radio */
 .settings-subsection {
   margin-top: 0.6rem;
@@ -815,10 +855,28 @@ footer {
   flex: 0 0 auto;
 }
 
+/* Save sits after the time field it also commits, not beside the date. */
+.settings-actions {
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.settings-error {
+  flex: 1;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--danger);
+}
+
+.settings-date[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
 .settings-save {
   font-family: inherit;
   font-size: 0.9rem;
-  padding: 0.35rem 0.9rem;
+  padding: 0.4rem 1.1rem;
   background: var(--accent);
   color: var(--accent-fg);
   border: none;
@@ -832,6 +890,7 @@ footer {
 
 /* Toggle switch */
 .settings-toggle-row {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -841,8 +900,22 @@ footer {
   user-select: none;
 }
 
+/* Visually hidden rather than display:none, which also took the switches
+   out of keyboard navigation and the accessibility tree. */
 .settings-checkbox {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.settings-checkbox:focus-visible + .settings-toggle-track {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .settings-toggle-track {
@@ -893,7 +966,6 @@ footer {
 }
 
 .settings-footer {
-  margin-top: 0.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--divider);
 }
@@ -923,6 +995,7 @@ footer {
   color: var(--accent);
   text-decoration: none;
   margin: 0 0.1rem;
+  white-space: nowrap;
 }
 
 .settings-feedback a:hover {
@@ -945,4 +1018,38 @@ footer {
 
 .settings-done:hover {
   background: var(--accent-hover);
+}
+
+/* Short windows (a 13" laptop with the browser toolbar): tighten the
+   vertical rhythm so the Appearance tab fits without scrolling. */
+@media (max-height: 760px) {
+  .settings-overlay {
+    padding: 1rem;
+  }
+
+  .settings-panel {
+    padding-top: 1.5rem;
+  }
+
+  .settings-title {
+    margin-bottom: 1rem;
+  }
+
+  .settings-tabs,
+  .settings-section {
+    margin-bottom: 1rem;
+  }
+
+  .swatch {
+    height: 40px;
+  }
+
+  .settings-footer {
+    padding-top: 0.75rem;
+  }
+
+  .settings-tabcount,
+  .settings-feedback {
+    margin-bottom: 0.6rem;
+  }
 }

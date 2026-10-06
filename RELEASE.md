@@ -46,6 +46,14 @@ in the PR description so future-you can see it was considered.
       every changed surface in both light and dark theme
 - [ ] No `console.log` left in `app/*.js` (except tests)
 
+Driving the check from Claude Code: the chrome-devtools MCP refuses
+`chrome-extension://` URLs (and does not list `chrome://newtab`), so serve the
+repo with `python3 -m http.server 8765` and open
+`http://127.0.0.1:8765/dashboard.html`. It is the same code; only
+`chrome.runtime` is missing, so to see the `WHATS_NEW` tooltip reload with an
+init script that stubs `chrome.runtime.getManifest`. That origin has its own
+`localStorage`, so the test never touches the real extension's settings.
+
 ### 2. Version bump
 - [ ] Decide PATCH / MINOR / MAJOR (see table above)
 - [ ] Bump `manifest.json` → `"version"`
@@ -248,6 +256,7 @@ add to it after each release.
   so the live listing shows a UI that no longer exists. Deliberate, not an
   accident — but it still has to be paid off. Lesson: refresh slots 3 and 4
   next release, before adding anything new to step 5's backlog.
+  **Paid off in 1.5.1:** both slots re-shot from the current panel.
 - **1.5.0** — `docs/` no longer exists (removed in `3a94f25`), so step 6c is
   permanently n/a until GitHub Pages is restored. Left in place rather than
   deleted: if the landing page ever comes back, the trap comes back with it.

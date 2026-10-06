@@ -122,6 +122,15 @@ export function parseStoredDate(raw) {
   return isNaN(date) ? null : date;
 }
 
+// Explains why a date of birth cannot be saved, or returns null if it can.
+// The Save button used to bail out silently on a bad value, which read as a
+// button that does nothing.
+export function dobError(dob, now = new Date()) {
+  if (!(dob instanceof Date) || isNaN(dob)) return 'Pick your date of birth first.';
+  if (dob > now) return "Date of birth can't be in the future.";
+  return null;
+}
+
 // Migrates a pre-1.5.0 date of birth.
 // Those builds stored the DOB as UTC midnight of the picked calendar day
 // (`input.valueAsDate` / `new Date('YYYY-MM-DD')`), which sits hours away from
@@ -578,6 +587,7 @@ export class App {
     const dobInput = document.getElementById('settings-dob');
     const dobTimeInput = document.getElementById('settings-dob-time');
     const dobTimeToggle = document.getElementById('settings-dob-time-toggle');
+    const dobErrorEl = document.getElementById('settings-dob-error');
     const quoteCheckbox = document.getElementById('settings-quote-toggle');
     const cdInput = document.getElementById('settings-countdown-date');
     const cdTimeInput = document.getElementById('settings-countdown-time');
@@ -600,10 +610,26 @@ export class App {
     }
     this.updateSettingsUI();
 
+    const setDobError = (message) => {
+      if (dobErrorEl) {
+        dobErrorEl.textContent = message || '';
+        dobErrorEl.hidden = !message;
+      }
+      if (message) dobInput?.setAttribute('aria-invalid', 'true');
+      else dobInput?.removeAttribute('aria-invalid');
+    };
+
     btn.addEventListener('click', () => {
       // Re-sync on open so a half-finished selection from last time (e.g. the
       // "Until date" radio clicked but no target picked) does not linger.
       this.updateSettingsUI();
+      // Likewise a date or time of birth typed but never saved: the "Set time"
+      // switch is reset to the saved state, so the fields have to match it.
+      if (dobInput) dobInput.value = this.dob ? formatLocalDate(this.dob) : '';
+      if (dobTimeInput) {
+        dobTimeInput.value = this.dob && this.dobHasTime ? formatLocalTime(this.dob) : '';
+      }
+      setDobError(null);
       overlay.hidden = false;
     });
 
@@ -615,17 +641,30 @@ export class App {
       if (e.target === overlay) overlay.hidden = true;
     });
 
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !overlay.hidden) closePanel();
+    });
+
     // DOB save — date and optional time commit together, on the Save button.
     saveBtn?.addEventListener('click', () => {
       const wantsTime = Boolean(dobTimeToggle?.checked && dobTimeInput?.value);
       const newDob = parseLocalDateTime(dobInput?.value, wantsTime ? dobTimeInput.value : '');
-      if (!newDob || newDob > new Date()) return;
+      const error = dobError(newDob);
+      if (error) {
+        setDobError(error);
+        dobInput?.focus();
+        return;
+      }
+      setDobError(null);
       this.dob = newDob;
       this.dobHasTime = wantsTime;
       this.save();
       closePanel();
       this.renderCounterOrChoose();
     });
+
+    dobInput?.addEventListener('input', () => setDobError(null));
+    dobTimeInput?.addEventListener('input', () => setDobError(null));
 
     dobTimeToggle?.addEventListener('change', () => {
       this.syncTimeRow('settings-dob-time-row', dobTimeToggle.checked);
@@ -728,11 +767,17 @@ export class App {
     const activeTab = localStorage.getItem('settingsTab') || 'counter';
     const setActiveTab = (name) => {
       document.querySelectorAll('[data-tab]').forEach(btn => {
-        btn.classList.toggle('settings-tab--active', btn.dataset.tab === name);
+        const active = btn.dataset.tab === name;
+        btn.classList.toggle('settings-tab--active', active);
+        btn.setAttribute('aria-selected', String(active));
       });
       document.querySelectorAll('[data-tab-panel]').forEach(panel => {
         panel.classList.toggle('settings-tab-panel--active', panel.dataset.tabPanel === name);
       });
+      // The panels share one scroll box, so a position left over from the
+      // other tab would open this one halfway down.
+      const scroller = document.querySelector('.settings-tab-panels');
+      if (scroller) scroller.scrollTop = 0;
       localStorage.setItem('settingsTab', name);
     };
     setActiveTab(activeTab);

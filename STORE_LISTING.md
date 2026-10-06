@@ -81,15 +81,19 @@ This extension has a single purpose: to replace the new tab page with a real-tim
 
 Chrome Web Store allows up to 5 screenshots. Required size: **1280×800** (or 640×400).
 
-### Recommended set (priority order):
+### Current set (`images/screenshots/`, in upload order):
 
-| # | What to show | Mode / State |
+| # | What it shows | Mode / State |
 |---|---|---|
-| 1 | Counter — age mode, light | Default state, no quote |
-| 2 | Counter — age mode, dark | Dark mode, with daily quote |
-| 3 | Counter — countdown to date | "Until date" mode with a target date and a time of day in the label |
-| 4 | Settings panel open | "Set time" toggles for the countdown target and date of birth; search bar + engine selector + Update tips in Counter tab; "Tabs opened" tally visible in the footer |
-| 5 | Counter — countdown to year end | "Until end of year" mode |
+| 1 | Counter — age mode, dark | Classic dark palette, with daily quote |
+| 2 | Counter — countdown to year end, light | "Until end of year" mode, Classic light palette |
+| 3 | Settings panel — Appearance tab | Size, theme, light/dark palettes, font; "Tabs opened" tally in the footer |
+| 4 | Settings panel — Counter tab | "Until date" with "Set time" on, date of birth with its own "Set time" toggle and Save |
+| 5 | Counter — age mode, Warm Paper palette | Light warm palette, with daily quote |
+
+Slots 3 and 4 were last refreshed in 1.5.1 by compositing a 1280×700 render
+of `dashboard.html` between the browser toolbar and footer bands of the
+previous shots, so the set keeps a consistent look.
 
 **Tip:** Screenshots 1 and 2 are the most important — they show the core experience. Settings screenshot (4) helps users understand the features before installing. You do not need to screenshot every state of the menu.
 

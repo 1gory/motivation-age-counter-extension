@@ -64,12 +64,12 @@
 </div>
 
 <div class="settings-overlay" id="settings-overlay" hidden>
-  <div class="settings-panel" role="dialog" aria-label="Settings">
+  <div class="settings-panel" role="dialog" aria-modal="true" aria-label="Settings">
     <h2 class="settings-title">Settings</h2>
 
     <div class="settings-tabs" role="tablist">
-      <button type="button" class="settings-tab" data-tab="counter" role="tab">Counter</button>
-      <button type="button" class="settings-tab" data-tab="appearance" role="tab">Appearance</button>
+      <button type="button" class="settings-tab" data-tab="counter" role="tab" aria-selected="false">Counter</button>
+      <button type="button" class="settings-tab" data-tab="appearance" role="tab" aria-selected="false">Appearance</button>
     </div>
 
     <div class="settings-tab-panels">
@@ -111,8 +111,8 @@
       <section class="settings-section">
         <label class="settings-label" for="settings-dob">Date of birth</label>
         <div class="settings-row">
-          <input type="date" id="settings-dob" class="settings-date">
-          <button type="button" class="settings-save" id="settings-save">Save</button>
+          <input type="date" id="settings-dob" class="settings-date"
+                 aria-describedby="settings-dob-error">
         </div>
         <label class="settings-toggle-row">
           <span>Set time</span>
@@ -122,6 +122,10 @@
         <div class="settings-row settings-time-row" id="settings-dob-time-row" hidden>
           <input type="time" id="settings-dob-time" class="settings-date"
                  aria-label="Time of birth">
+        </div>
+        <div class="settings-row settings-actions">
+          <p class="settings-error" id="settings-dob-error" role="alert" hidden></p>
+          <button type="button" class="settings-save" id="settings-save">Save</button>
         </div>
       </section>
 

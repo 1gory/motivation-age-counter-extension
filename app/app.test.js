@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateAge, calculateCountdown, endOfYear, incrementTabCount, TemplateEngine, MILLISECONDS_PER_YEAR, parseLocalDate, formatLocalDate, parseLocalTime, parseLocalDateTime, formatLocalTime, formatCountdownLabel, normalizeLegacyDob, parseStoredDate } from './app.js';
+import { calculateAge, calculateCountdown, endOfYear, incrementTabCount, TemplateEngine, MILLISECONDS_PER_YEAR, parseLocalDate, formatLocalDate, parseLocalTime, parseLocalDateTime, formatLocalTime, formatCountdownLabel, normalizeLegacyDob, parseStoredDate, dobError } from './app.js';
 import { hashDay, getQuoteOfTheDay } from './daily-quote.js';
 import { SEARCH_ENGINES, DEFAULT_ENGINE, buildSearchUrl } from './search-engines.js';
 import { getWhatsNew, isFirstInstall } from './whats-new.js';
@@ -316,6 +316,34 @@ describe('normalizeLegacyDob', () => {
   it('returns null for an unusable timestamp', () => {
     expect(normalizeLegacyDob(NaN)).toBeNull();
     expect(normalizeLegacyDob(1e20)).toBeNull();
+  });
+});
+
+describe('dobError', () => {
+  const now = new Date(2026, 9, 6, 15, 0);
+
+  it('accepts a date of birth in the past', () => {
+    expect(dobError(new Date(1990, 4, 15), now)).toBeNull();
+  });
+
+  it('accepts a time of birth earlier today', () => {
+    expect(dobError(new Date(2026, 9, 6, 9, 30), now)).toBeNull();
+  });
+
+  it('asks for a date when there is none', () => {
+    expect(dobError(null, now)).toMatch(/date of birth/i);
+  });
+
+  it('asks for a date when the value is an Invalid Date', () => {
+    expect(dobError(new Date(NaN), now)).toMatch(/date of birth/i);
+  });
+
+  it('rejects a date in the future', () => {
+    expect(dobError(new Date(2030, 0, 1), now)).toMatch(/future/i);
+  });
+
+  it('rejects a time later today', () => {
+    expect(dobError(new Date(2026, 9, 6, 18, 0), now)).toMatch(/future/i);
   });
 });
 
